@@ -381,3 +381,14 @@
   }
 }
 
+.task-expenses-section {
+  margin-top: 20px;
+}
+
+.task-expenses-table-container {
+  margin-top: 12px;
+  overflow-x: auto;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+

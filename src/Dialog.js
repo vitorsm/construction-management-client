@@ -44,11 +44,10 @@ function Dialog({ isOpen, title, onClose, children, maxWidth = '600px', footerBu
   };
 
   return (
-    <div className="dialog-overlay" onClick={onClose}>
+    <div className="generic-dialog-overlay" onClick={onClose}>
       <div 
-        className="dialog-content" 
+        className="generic-dialog-content"
         onClick={(e) => e.stopPropagation()}
-        style={{ maxWidth }}
       >
         <div className="dialog-header">
           <h2>{title}</h2>

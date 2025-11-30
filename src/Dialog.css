@@ -1,5 +1,5 @@
 /* Dialog Styles */
-.dialog-overlay {
+.generic-dialog-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -13,7 +13,7 @@
   padding: 20px;
 }
 
-.dialog-content {
+.generic-dialog-content {
   background: white;
   border-radius: 12px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
@@ -168,9 +168,20 @@
 }
 
 @media (max-width: 768px) {
-  .dialog-content {
-    max-width: 100%;
-    margin: 10px;
+  .generic-dialog-overlay {
+    padding: 0;
+    align-items: stretch;
+    justify-content: flex-start;
+  }
+
+  .generic-dialog-content {
+    max-width: 100vw;
+    max-height: 100vh;
+    height: 100vh;
+    width: 100vw;
+    margin: 0;
+    border-radius: 0;
+    box-shadow: none;
   }
 
   .dialog-header h2 {
@@ -178,11 +189,13 @@
   }
 
   .dialog-footer {
-    flex-direction: column;
+    flex-direction: row;
+    flex-wrap: wrap;
   }
 
   .dialog-footer button {
-    width: 100%;
+    flex: 1;
+    min-width: 0;
   }
 }
 

@@ -69,6 +69,8 @@
 
 .project-summary {
   margin-top: 40px;
+  margin-left: 20px;
+  margin-right: 20px;
 }
 
 .project-summary h2 {
@@ -402,6 +404,28 @@
   width: 100%;
 }
 
+.expense-type-selector {
+  padding: 6px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: white;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.expense-type-selector:hover {
+  border-color: #667eea;
+}
+
+.expense-type-selector:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
 .date-info {
   display: flex;
   flex-direction: row;
@@ -623,6 +647,12 @@
 }
 
 @media (max-width: 768px) {
+  .project-progress {
+    margin-top: 50px;
+    margin-left: 20px;
+    margin-right: 20px;
+  }
+  
   .summary-cards {
     grid-template-columns: 1fr;
   }
@@ -727,7 +757,7 @@
   padding: 20px;
 }
 
-.dialog-content {
+.generic-dialog-content {
   background: white;
   border-radius: 12px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);

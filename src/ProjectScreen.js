@@ -5,6 +5,7 @@ import { API_BASE_URL } from './config';
 import DailyReport from './DailyReport';
 import TaskDetailsDialog from './TaskDetailsDialog';
 import ExpenseDetailsDialog from './ExpenseDetailsDialog';
+import GenericScreen from './GenericScreen';
 import './ProjectScreen.css';
 
 function ProjectScreen() {
@@ -147,17 +148,12 @@ function ProjectScreen() {
   }, [fetchProject, fetchTasks]);
 
   return (
-    <div className="project-screen-container">
-      <div className="project-screen-content">
-        <button 
-          className="project-screen-back-button"
-          onClick={() => navigate('/projects')}
-        >
-          ← Back to Projects
-        </button>
-        <h1>{project?.name || 'Project Screen'}</h1>
-        <p>This is the main project screen. Content will be added here.</p>
-        
+    <>
+      <GenericScreen
+        title={project?.name || 'Project Screen'}
+        backPath="/projects"
+      >
+                
         <div className="project-screen-buttons">
           <button 
             className="project-screen-button"
@@ -194,7 +190,7 @@ function ProjectScreen() {
             Dashboard
           </button>
         </div>
-      </div>
+      </GenericScreen>
       
       {/* Daily Report Dialog */}
       <DailyReport
@@ -225,7 +221,7 @@ function ProjectScreen() {
         onCreate={handleExpenseCreate}
         projectId={projectId}
       />
-    </div>
+    </>
   );
 }
 

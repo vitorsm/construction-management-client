@@ -1,10 +1,25 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { checkAuthError } from './apiUtils';
 import { API_BASE_URL } from './config';
 import TasksSelect from './TasksSelect';
+import Dialog from './Dialog';
 import './DailyReport.css';
 
 function DailyReport({ isOpen, onClose, tasks, onSuccess }) {
+  // Flatten tasks recursively to include all children
+  const flattenTasks = useMemo(() => {
+    const flatten = (taskList) => {
+      const result = [];
+      for (const task of taskList) {
+        result.push(task);
+        if (task.children && Array.isArray(task.children) && task.children.length > 0) {
+          result.push(...flatten(task.children));
+        }
+      }
+      return result;
+    };
+    return flatten(tasks || []);
+  }, [tasks]);
   const [taskHistory, setTaskHistory] = useState({
     task_id: '',
     progress: '0',
@@ -105,7 +120,8 @@ function DailyReport({ isOpen, onClose, tasks, onSuccess }) {
         throw new Error('No access token found. Please login again.');
       }
 
-      const selectedTask = tasks.find(task => task.id === taskHistory.task_id);
+    console.log("taskHistory", taskHistory)
+      const selectedTask = flattenTasks.find(task => task.id === taskHistory.task_id);
 
       const formData = new FormData();
       formData.append('file', selectedPhotos[photoIndex]);
@@ -235,142 +251,152 @@ function DailyReport({ isOpen, onClose, tasks, onSuccess }) {
     }
   };
 
-  if (!isOpen) {
-    return null;
-  }
+  const formId = 'daily-report-form';
+  const footerButtons = [
+    {
+      type: 'cancel',
+      onClick: handleClose
+    },
+    {
+      type: 'save',
+      label: 'Create Task History',
+      formSubmit: true,
+      formId: formId
+    }
+  ];
 
   return (
-    <div className="dialog-overlay" onClick={handleClose}>
-      <div className="dialog-content" onClick={(e) => e.stopPropagation()}>
-        <div className="dialog-header">
-          <h2>Daily Report</h2>
-          <button className="dialog-close-button" onClick={handleClose}>×</button>
-        </div>
-        <form onSubmit={handleCreateTaskHistory}>
-          <div className="dialog-body">
-            <div className="task-detail-item">
-              <label className="task-detail-label" htmlFor="task-history-task">Task *</label>
-              <TasksSelect
-                id="task-history-task"
-                tasks={tasks}
-                value={taskHistory.task_id}
-                onChange={(e) => {
-                  const selectedTaskId = e.target.value;
-                  const selectedTask = tasks.find(task => task.id === selectedTaskId);
-                  
-                  setTaskHistory({
-                    ...taskHistory,
-                    task_id: selectedTaskId,
-                    progress: selectedTask ? String(selectedTask.progress || 0) : '0',
-                    status: selectedTask ? selectedTask.status || 'TODO' : 'TODO'
-                  });
-                }}
-                required
-              />
-            </div>
-            <div className="task-detail-item">
-              <label className="task-detail-label" htmlFor="task-history-progress">
-                Progress: {taskHistory.progress || '0'}%
-              </label>
+    <Dialog
+      isOpen={isOpen}
+      title="Daily Report"
+      onClose={handleClose}
+      footerButtons={footerButtons}
+    >
+      <form id={formId} onSubmit={handleCreateTaskHistory}>
+        <div className="dialog-body">
+          <div className="task-detail-item">
+            <label className="task-detail-label" htmlFor="task-history-task">Task *</label>
+            <TasksSelect
+              id="task-history-task"
+              tasks={tasks}
+              value={taskHistory.task_id}
+              onChange={(e) => {
+                const selectedTaskId = e.target.value;
+                const selectedTask = flattenTasks.find(task => task.id === selectedTaskId);
+                console.log("selectedTask", selectedTask)
+                
+                setTaskHistory({
+                  ...taskHistory,
+                  task_id: selectedTaskId,
+                  progress: selectedTask ? String(selectedTask.progress || 0) : '0',
+                  status: selectedTask ? selectedTask.status || 'TODO' : 'TODO'
+                });
+              }}
+              required
+            />
+          </div>
+          
+          <div className="task-detail-item">
+            <label className="task-detail-label" htmlFor="task-history-status">Status</label>
+            <select
+              id="task-history-status"
+              className="task-input"
+              value={taskHistory.status}
+              onChange={(e) => {
+                const newStatus = e.target.value;
+                setTaskHistory({ 
+                  ...taskHistory, 
+                  status: newStatus,
+                  progress: newStatus === 'DONE' ? '100' : taskHistory.progress
+                });
+              }}
+            >
+              <option value="TODO">Not Started</option>
+              <option value="IN_PROGRESS">In Progress</option>
+              <option value="DONE">Completed</option>
+            </select>
+          </div>
+          <div className="task-detail-item">
+            <label className="task-detail-label" htmlFor="task-history-progress">
+              Progress: {taskHistory.progress || '0'}%
+            </label>
+            <input
+              type="range"
+              id="task-history-progress"
+              className="progress-slider"
+              value={taskHistory.progress || '0'}
+              onChange={(e) => setTaskHistory({ ...taskHistory, progress: e.target.value })}
+              min="0"
+              max="100"
+              step="1"
+            />
+          </div>
+          <div className="task-detail-item">
+            <label className="task-detail-label" htmlFor="task-history-comment">Comment</label>
+            <textarea
+              id="task-history-comment"
+              className="task-input"
+              value={taskHistory.comment}
+              onChange={(e) => setTaskHistory({ ...taskHistory, comment: e.target.value })}
+              rows="4"
+              placeholder="Enter a comment about the task progress"
+            />
+          </div>
+          <div className="task-detail-item">
+            <label className="task-detail-label">Photos</label>
+            <div className="photo-upload-container">
               <input
-                type="range"
-                id="task-history-progress"
-                className="progress-slider"
-                value={taskHistory.progress || '0'}
-                onChange={(e) => setTaskHistory({ ...taskHistory, progress: e.target.value })}
-                min="0"
-                max="100"
-                step="1"
+                type="file"
+                id="task-history-photo"
+                accept="image/*"
+                multiple
+                onChange={handlePhotoSelect}
+                style={{ display: 'none' }}
               />
-            </div>
-            <div className="task-detail-item">
-              <label className="task-detail-label" htmlFor="task-history-status">Status</label>
-              <select
-                id="task-history-status"
-                className="task-input"
-                value={taskHistory.status}
-                onChange={(e) => setTaskHistory({ ...taskHistory, status: e.target.value })}
-              >
-                <option value="TODO">Not Started</option>
-                <option value="IN_PROGRESS">In Progress</option>
-                <option value="DONE">Completed</option>
-              </select>
-            </div>
-            <div className="task-detail-item">
-              <label className="task-detail-label" htmlFor="task-history-comment">Comment</label>
-              <textarea
-                id="task-history-comment"
-                className="task-input"
-                value={taskHistory.comment}
-                onChange={(e) => setTaskHistory({ ...taskHistory, comment: e.target.value })}
-                rows="4"
-                placeholder="Enter a comment about the task progress"
-              />
-            </div>
-            <div className="task-detail-item">
-              <label className="task-detail-label">Photos</label>
-              <div className="photo-upload-container">
-                <input
-                  type="file"
-                  id="task-history-photo"
-                  accept="image/*"
-                  multiple
-                  onChange={handlePhotoSelect}
-                  style={{ display: 'none' }}
-                />
-                <label htmlFor="task-history-photo" className="photo-select-button">
-                  Add Photos
-                </label>
-                {photoPreviews.length > 0 && (
-                  <div className="photos-preview-list">
-                    {photoPreviews.map((preview, index) => {
-                      const isUploaded = uploadedPhotoIndices.has(index);
-                      return (
-                        <div key={index} className="photo-preview-container">
-                          <div className="photo-preview-wrapper">
-                            <img src={preview} alt={`Preview ${index + 1}`} className="photo-preview" />
-                            {isUploaded && (
-                              <div className="photo-uploaded-icon">
-                                ✓
-                              </div>
-                            )}
-                          </div>
-                          <div className="photo-preview-actions">
-                            <button
-                              type="button"
-                              className="photo-upload-btn"
-                              onClick={() => handleUploadPhoto(index)}
-                              disabled={!taskHistory.task_id || isUploaded}
-                            >
-                              {isUploaded ? 'Uploaded' : 'Upload'}
-                            </button>
-                            <button
-                              type="button"
-                              className="photo-remove-btn"
-                              onClick={() => handleRemovePhoto(index)}
-                            >
-                              Remove
-                            </button>
-                          </div>
+              <label htmlFor="task-history-photo" className="photo-select-button">
+                Add Photos
+              </label>
+              {photoPreviews.length > 0 && (
+                <div className="photos-preview-list">
+                  {photoPreviews.map((preview, index) => {
+                    const isUploaded = uploadedPhotoIndices.has(index);
+                    return (
+                      <div key={index} className="photo-preview-container">
+                        <div className="photo-preview-wrapper">
+                          <img src={preview} alt={`Preview ${index + 1}`} className="photo-preview" />
+                          {isUploaded && (
+                            <div className="photo-uploaded-icon">
+                              ✓
+                            </div>
+                          )}
                         </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
+                        <div className="photo-preview-actions">
+                          <button
+                            type="button"
+                            className="photo-upload-btn"
+                            onClick={() => handleUploadPhoto(index)}
+                            disabled={!taskHistory.task_id || isUploaded}
+                          >
+                            {isUploaded ? 'Uploaded' : 'Upload'}
+                          </button>
+                          <button
+                            type="button"
+                            className="photo-remove-btn"
+                            onClick={() => handleRemovePhoto(index)}
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
-          <div className="dialog-footer">
-            <button type="button" className="dialog-cancel-btn" onClick={handleClose}>
-              Cancel
-            </button>
-            <button type="submit" className="dialog-close-btn">
-              Create Task History
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+        </div>
+      </form>
+    </Dialog>
   );
 }
 

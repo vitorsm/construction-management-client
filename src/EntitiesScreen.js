@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { checkAuthError } from './apiUtils';
 import { API_BASE_URL } from './config';
 import MultiSelect from './MultiSelect';
 import EntityTable from './EntityTable';
+import GenericScreen from './GenericScreen';
 import './EntitiesScreen.css';
 
 function EntitiesScreen({
@@ -24,10 +25,10 @@ function EntitiesScreen({
   errorMessage,
   filterEntities,
   projectId: propProjectId,
+  tableComponent: TableComponent,
 }) {
   const { projectId: paramProjectId } = useParams();
   const projectId = propProjectId || paramProjectId;
-  const navigate = useNavigate();
   
   const [project, setProject] = useState(null);
   const [entities, setEntities] = useState([]);
@@ -181,17 +182,15 @@ function EntitiesScreen({
     }));
   };
 
+  const screenTitle = project ? `${project.name} - ${title}` : title;
+  const finalBackPath = backPath || `/projects/${projectId}/dashboard`;
+
   return (
-    <div className="entities-screen-container">
-      <div className="entities-screen-content">
-        <button 
-          className="entities-screen-back-button"
-          onClick={() => navigate(backPath || `/projects/${projectId}/dashboard`)}
-        >
-          ← Back
-        </button>
-        <h1>{project?.name || 'Project'} - {title}</h1>
-        
+    <>
+      <GenericScreen
+        title={screenTitle}
+        backPath={finalBackPath}
+      >
         {/* Filter Toggle Button */}
         {filterConfig.length > 0 && (
           <div className="entities-filter-toggle-container">
@@ -308,8 +307,14 @@ function EntitiesScreen({
                   : (noFilterMatchMessage || `No ${entityName} match the current filters.`)}
               </div>
             ) : (
-              // Check if tableConfig uses EntityTable (columns have 'attribute' property) or renderRows
-              tableConfig.columns && tableConfig.columns.some(col => col.attribute) ? (
+              // Use custom table component if provided, otherwise check if tableConfig uses EntityTable (columns have 'attribute' property) or renderRows
+              TableComponent ? (
+                <TableComponent
+                  entities={filteredEntities}
+                  onRowClick={handleEntityClick}
+                  getRowKey={tableConfig?.getRowKey}
+                />
+              ) : (
                 <EntityTable
                   entities={filteredEntities}
                   columns={tableConfig.columns}
@@ -318,31 +323,11 @@ function EntitiesScreen({
                   getRowKey={tableConfig.getRowKey}
                   tableId={tableConfig.tableId}
                 />
-              ) : (
-                <div className="entities-table-container">
-                  <table className="entities-table">
-                    <thead>
-                      <tr>
-                        {tableConfig.columns.map((column, index) => (
-                          <th 
-                            key={index}
-                            className={column.hideMobile ? 'hide-mobile' : ''}
-                          >
-                            {column.header}
-                          </th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {tableConfig.renderRows(filteredEntities, handleEntityClick)}
-                    </tbody>
-                  </table>
-                </div>
               )
             )
           )}
         </div>
-      </div>
+      </GenericScreen>
 
       {/* Details Dialog */}
       {DetailsDialog && (
@@ -359,7 +344,7 @@ function EntitiesScreen({
           }}
         />
       )}
-    </div>
+    </>
   );
 }
 

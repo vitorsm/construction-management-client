@@ -4,6 +4,7 @@ import { checkAuthError } from './apiUtils';
 import { API_BASE_URL } from './config';
 import ExpenseDetailsDialog from './ExpenseDetailsDialog';
 import EntitiesScreen from './EntitiesScreen';
+import ExpensesTable from './ExpensesTable';
 import './ExpensesScreen.css';
 
 function ExpensesScreen() {
@@ -70,26 +71,6 @@ function ExpensesScreen() {
     fetchItems();
   }, [fetchItems]);
 
-  const formatCurrency = (value) => {
-    if (!value && value !== 0) return 'N/A';
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(value);
-  };
-
-  const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    }).format(date);
-  };
-
   const filterEntities = (expenses, filterStates) => {
     return expenses.filter(expense => {
       // Expense class filter
@@ -139,6 +120,16 @@ function ExpensesScreen() {
     });
   };
 
+  const formatCurrency = (value) => {
+    if (!value && value !== 0) return 'N/A';
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(value);
+  };
+
   const getSummaryStats = (expenses) => {
     const total = expenses.reduce((sum, expense) => sum + (parseFloat(expense.value) || 0), 0);
     const count = expenses.length;
@@ -185,80 +176,6 @@ function ExpensesScreen() {
     },
   ];
 
-  const tableConfig = {
-    columns: [
-      {
-        header: 'Name',
-        attribute: 'name',
-        cellClassName: 'expense-name mobile-clickable',
-        render: (expense, value) => (
-          <span title={value}>{value}</span>
-        ),
-      },
-      {
-        header: 'Type',
-        attribute: 'expense_type',
-        hideMobile: true,
-        render: (expense, value) => (
-          <span className={`expense-type-badge expense-type-${value?.toLowerCase()}`}>
-            {value}
-          </span>
-        ),
-        clickable: false,
-      },
-      {
-        header: 'Class',
-        attribute: 'expense_class',
-        hideMobile: true,
-        render: (expense, value) => (
-          <span className={`expense-class-badge expense-class-${value?.toLowerCase()}`}>
-            {value}
-          </span>
-        ),
-        clickable: false,
-      },
-      {
-        header: 'Value',
-        attribute: 'value',
-        cellClassName: 'expense-value-cell',
-        format: formatCurrency,
-        render: (expense, value, onRowClick, formattedValue) => (
-          <span className="expense-value-value">{formattedValue}</span>
-        ),
-        clickable: false,
-      },
-      {
-        header: 'Created At',
-        attribute: 'created_at',
-        hideMobile: true,
-        cellClassName: 'expense-date-cell',
-        format: formatDate,
-        render: (expense, value, onRowClick, formattedValue) => (
-          <span className="expense-date-value">{formattedValue}</span>
-        ),
-        clickable: false,
-      },
-      {
-        header: 'Details',
-        hideMobile: true,
-        render: (expense, value, onRowClick) => (
-          <button 
-            className="expense-details-button" 
-            onClick={(e) => {
-              e.stopPropagation();
-              if (onRowClick) {
-                onRowClick(expense);
-              }
-            }}
-          >
-            Details
-          </button>
-        ),
-        clickable: false,
-      },
-    ],
-  };
-
   return (
     <EntitiesScreen
       title="Expenses"
@@ -266,7 +183,7 @@ function ExpensesScreen() {
       backPath={`/projects/${projectId}/dashboard`}
       fetchEntities={fetchExpenses}
       filterConfig={filterConfig}
-      tableConfig={tableConfig}
+      tableComponent={ExpensesTable}
       summaryConfig={getSummaryConfig}
       createButtonText="+ Create Expense"
       detailsDialog={ExpenseDetailsDialog}

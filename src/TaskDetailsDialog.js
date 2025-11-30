@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { checkAuthError } from './apiUtils';
 import { API_BASE_URL } from './config';
 import Dialog from './Dialog';
 import ExpenseDetailsDialog from './ExpenseDetailsDialog';
+import ExpensesTable from './ExpensesTable';
 import './TaskDetailsDialog.css';
 
 function TaskDetailsDialog({ isOpen, task, onClose, onUpdate, onDelete, onCreate, projectId, parentTaskId }) {
@@ -11,6 +12,9 @@ function TaskDetailsDialog({ isOpen, task, onClose, onUpdate, onDelete, onCreate
   const [viewingChildTask, setViewingChildTask] = useState(null);
   const [isCreatingChildTask, setIsCreatingChildTask] = useState(false);
   const [isExpenseDialogOpen, setIsExpenseDialogOpen] = useState(false);
+  const [selectedExpense, setSelectedExpense] = useState(null);
+  const [expenses, setExpenses] = useState([]);
+  const [loadingExpenses, setLoadingExpenses] = useState(false);
   const isCreateMode = !task || isCreatingChildTask;
 
   useEffect(() => {
@@ -20,6 +24,8 @@ function TaskDetailsDialog({ isOpen, task, onClose, onUpdate, onDelete, onCreate
       setViewingChildTask(null);
       setIsCreatingChildTask(false);
       setIsExpenseDialogOpen(false);
+      setSelectedExpense(null);
+      setExpenses([]);
     } else if (isCreateMode) {
       // Initialize form for create mode
       setEditedTask({
@@ -34,6 +40,54 @@ function TaskDetailsDialog({ isOpen, task, onClose, onUpdate, onDelete, onCreate
       setIsEditMode(true);
     }
   }, [isOpen, isCreateMode]);
+
+  const fetchTaskExpenses = useCallback(async (taskId) => {
+    if (!taskId) {
+      setExpenses([]);
+      return;
+    }
+
+    setLoadingExpenses(true);
+    try {
+      const token = localStorage.getItem('access_token');
+      
+      if (!token) {
+        throw new Error('No access token found. Please login again.');
+      }
+
+      const response = await fetch(`${API_BASE_URL}/api/tasks/${taskId}/expenses`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        if (checkAuthError(response)) {
+          return;
+        }
+        throw new Error(`Failed to fetch expenses: ${response.status} ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      setExpenses(data || []);
+    } catch (err) {
+      console.error('Error fetching task expenses:', err);
+      setExpenses([]);
+    } finally {
+      setLoadingExpenses(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isOpen && !isEditMode && !isCreateMode) {
+      const currentTask = viewingChildTask || task;
+      if (currentTask && currentTask.id) {
+        fetchTaskExpenses(currentTask.id);
+      }
+    }
+  }, [isOpen, isEditMode, isCreateMode, task, viewingChildTask, fetchTaskExpenses]);
 
   const formatDate = (date) => {
     if (!date) return 'N/A';
@@ -229,7 +283,8 @@ function TaskDetailsDialog({ isOpen, task, onClose, onUpdate, onDelete, onCreate
         progress: parseInt(editedTask.progress) || 0,
         status: editedTask.status,
         workspace: {"id": "f0ae47da-7352-455c-a3ad-02e7fb8d29c9"},
-        project: {"id": projectId}
+        project: {"id": projectId},
+        parent_task_id: currentTask.parent_task_id || null
       };
 
       const response = await fetch(`${API_BASE_URL}/api/tasks/${currentTask.id}`, {
@@ -347,11 +402,39 @@ function TaskDetailsDialog({ isOpen, task, onClose, onUpdate, onDelete, onCreate
   };
 
   const handleCreateExpense = () => {
+    setSelectedExpense(null);
     setIsExpenseDialogOpen(true);
   };
 
   const handleCloseExpenseDialog = () => {
     setIsExpenseDialogOpen(false);
+    setSelectedExpense(null);
+    // Refresh expenses when dialog closes
+    const currentTask = getCurrentTask();
+    if (currentTask && currentTask.id) {
+      fetchTaskExpenses(currentTask.id);
+    }
+  };
+
+  const handleExpenseClick = (expense) => {
+    setSelectedExpense(expense);
+    setIsExpenseDialogOpen(true);
+  };
+
+  const handleExpenseUpdate = () => {
+    // Refresh expenses after update
+    const currentTask = getCurrentTask();
+    if (currentTask && currentTask.id) {
+      fetchTaskExpenses(currentTask.id);
+    }
+  };
+
+  const handleExpenseDelete = () => {
+    // Refresh expenses after delete
+    const currentTask = getCurrentTask();
+    if (currentTask && currentTask.id) {
+      fetchTaskExpenses(currentTask.id);
+    }
   };
 
   const dialogTitle = isCreateMode 
@@ -381,8 +464,7 @@ function TaskDetailsDialog({ isOpen, task, onClose, onUpdate, onDelete, onCreate
   // Build footer buttons for view mode
   const viewModeFooterButtons = task && !isEditMode ? [
     { type: 'delete', onClick: handleDeleteTask, show: true },
-    { type: 'edit', onClick: handleEditTask, show: true },
-    { type: 'close', onClick: onClose, show: true }
+    { type: 'edit', onClick: handleEditTask, show: true }
   ] : [];
 
   const footerButtons = editModeFooterButtons.length > 0 ? editModeFooterButtons : viewModeFooterButtons;
@@ -403,12 +485,6 @@ function TaskDetailsDialog({ isOpen, task, onClose, onUpdate, onDelete, onCreate
                   Creating child task for: <strong>{task.name}</strong>
                 </div>
               )}
-              {!isCreateMode && (
-                <div className="task-detail-item">
-                  <span className="task-detail-label">ID:</span>
-                  <span className="task-detail-value task-id-value">{getCurrentTask().id}</span>
-                </div>
-              )}
               <div className="task-detail-item">
                 <label className="task-detail-label" htmlFor="edit-task-name">Name *</label>
                 <input
@@ -427,7 +503,14 @@ function TaskDetailsDialog({ isOpen, task, onClose, onUpdate, onDelete, onCreate
                   id="edit-task-status"
                   className="task-input"
                   value={editedTask.status}
-                  onChange={(e) => setEditedTask({ ...editedTask, status: e.target.value })}
+                  onChange={(e) => {
+                    const newStatus = e.target.value;
+                    setEditedTask({ 
+                      ...editedTask, 
+                      status: newStatus,
+                      progress: newStatus === 'DONE' ? 100 : editedTask.progress
+                    });
+                  }}
                 >
                   <option value="TODO">Not Started</option>
                   <option value="IN_PROGRESS">In Progress</option>
@@ -487,6 +570,12 @@ function TaskDetailsDialog({ isOpen, task, onClose, onUpdate, onDelete, onCreate
                   onChange={(e) => setEditedTask({ ...editedTask, actual_end_date: e.target.value })}
                 />
               </div>
+              {!isCreateMode && (
+                <div className="task-detail-item">
+                  <span className="task-detail-label">ID:</span>
+                  <span className="task-detail-value task-id-value">{getCurrentTask().id}</span>
+                </div>
+              )}
             </div>
             </form>
         ) : task ? (
@@ -502,10 +591,6 @@ function TaskDetailsDialog({ isOpen, task, onClose, onUpdate, onDelete, onCreate
                   ⚠️ Task is Delayed
                 </div>
               )}
-              <div className="task-detail-item">
-                <span className="task-detail-label">ID:</span>
-                <span className="task-detail-value task-id-value">{getCurrentTask().id}</span>
-              </div>
               <div className="task-detail-item">
                 <span className="task-detail-label">Name:</span>
                 <span className="task-detail-value">{getCurrentTask().name}</span>
@@ -631,17 +716,48 @@ function TaskDetailsDialog({ isOpen, task, onClose, onUpdate, onDelete, onCreate
                   + Register New Expense
                 </button>
               </div>
+              {!viewingChildTask && (
+                <div className="task-detail-item task-expenses-section">
+                  <div className="task-children-header">
+                    <span className="task-detail-label">Expenses:</span>
+                  </div>
+                  {loadingExpenses ? (
+                    <div className="no-children-message">
+                      Loading expenses...
+                    </div>
+                  ) : expenses.length === 0 ? (
+                    <div className="no-children-message">
+                      No expenses registered for this task yet.
+                    </div>
+                  ) : (
+                    <div className="task-expenses-table-container">
+                      <ExpensesTable
+                        entities={expenses}
+                        onRowClick={handleExpenseClick}
+                        getRowKey={(expense) => expense.id}
+                        columnsToShow={['name', 'class', 'value']}
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
+              {!isCreateMode && (
+                <div className="task-detail-item">
+                  <span className="task-detail-label">ID:</span>
+                  <span className="task-detail-value task-id-value">{getCurrentTask().id}</span>
+                </div>
+              )}
             </div>
           </>
         ) : null}
     </Dialog>
     <ExpenseDetailsDialog
       isOpen={isExpenseDialogOpen}
-      expense={null}
+      expense={selectedExpense}
       onClose={handleCloseExpenseDialog}
-      onUpdate={null}
-      onDelete={null}
-      onCreate={null}
+      onUpdate={handleExpenseUpdate}
+      onDelete={handleExpenseDelete}
+      onCreate={handleExpenseUpdate}
       projectId={projectId}
       initialTaskId={getCurrentTask()?.id}
     />

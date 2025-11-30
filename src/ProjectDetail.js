@@ -5,8 +5,9 @@ import { API_BASE_URL } from './config';
 import TaskDetailsDialog from './TaskDetailsDialog';
 import DailyReport from './DailyReport';
 import PieChart from './PieChart';
-import EntityTable from './EntityTable';
 import ExpenseDetailsDialog from './ExpenseDetailsDialog';
+import GenericScreen from './GenericScreen';
+import TasksTable from './TasksTable';
 import './ProjectDetail.css';
 
 function ProjectDetail() {
@@ -54,6 +55,9 @@ function ProjectDetail() {
   
   // Expense dialog state
   const [isExpenseDialogOpen, setIsExpenseDialogOpen] = useState(false);
+  
+  // Expense type chart state
+  const [expenseChartType, setExpenseChartType] = useState('planned');
 
   const fetchProject = useCallback(async () => {
     try {
@@ -212,57 +216,12 @@ function ProjectDetail() {
     }).format(value);
   };
 
-  const getTaskCost = (task) => {
-    if (!task.expenses_values) return 0;
-    if (Array.isArray(task.expenses_values)) {
-      return task.expenses_values.reduce((sum, val) => sum + (parseFloat(val) || 0), 0);
-    }
-    return parseFloat(task.expenses_values) || 0;
-  };
-
   const formatDate = (date) => {
     return new Intl.DateTimeFormat('en-US', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
     }).format(date);
-  };
-
-  const formatDateShort = (date) => {
-    if (!date) return 'N/A';
-    return new Intl.DateTimeFormat('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    }).format(date);
-  };
-
-  const getStartDate = (task) => {
-    return task.actual_start_date || task.planned_start_date;
-  };
-
-  const getEndDate = (task) => {
-    return task.actual_end_date || task.planned_end_date;
-  };
-
-  const isTaskDelayed = (task) => {
-    if (!task.planned_end_date) return false;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const plannedEnd = new Date(task.planned_end_date);
-    plannedEnd.setHours(0, 0, 0, 0);
-    
-    // Task is delayed if:
-    // 1. It's not completed and past the planned end date, OR
-    // 2. It's completed but the actual end date is after the planned end date
-    if (task.status.toLowerCase() !== 'completed') {
-      return plannedEnd < today;
-    } else if (task.actual_end_date) {
-      const actualEnd = new Date(task.actual_end_date);
-      actualEnd.setHours(0, 0, 0, 0);
-      return actualEnd > plannedEnd;
-    }
-    return false;
   };
 
   const handleDetailsClick = (task) => {
@@ -336,13 +295,11 @@ function ProjectDetail() {
   };
   console.log(project);
   return (
-    <div className="project-detail-container">
-      <div className="project-detail-content">
-        <button className="back-button" onClick={() => navigate(`/projects/${projectId}`)}>
-          ← Back
-        </button>
-        <h1>{project ? project.name : 'Project Detail'}</h1>
-                
+    <>
+      <GenericScreen
+        title={project ? project.name : 'Project Detail'}
+        backPath={`/projects/${projectId}`}
+      >
         <div className="project-summary">
           <h2>Project Summary</h2>
           
@@ -471,10 +428,23 @@ function ProjectDetail() {
             >
               <div className="progress-card-header">
                 <div className="progress-card-label">Expenses by Type</div>
+                <select 
+                  className="expense-type-selector"
+                  value={expenseChartType}
+                  onChange={(e) => setExpenseChartType(e.target.value)}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <option value="planned">Planned</option>
+                  <option value="actual">Actual</option>
+                </select>
               </div>
               <div className="expenses-type-chart-container">
                 <PieChart
-                  data={dashboard?.expenses?.expenses_value_by_type || {}}
+                  data={
+                    expenseChartType === 'planned' 
+                      ? (dashboard?.expenses?.planned_expenses_value_by_type || {})
+                      : (dashboard?.expenses?.actual_expenses_value_by_type || {})
+                  }
                   colorMap={expenseTypeColors}
                   size={200}
                   radius={80}
@@ -495,94 +465,14 @@ function ProjectDetail() {
           ) : tasks.length === 0 ? (
             <div className="no-tasks">No tasks found.</div>
           ) : (
-            <div className="tasks-table-container">
-              <EntityTable
-                entities={tasks}
-                columns={[
-                  {
-                    header: 'Name',
-                    attribute: 'name',
-                    cellClassName: 'task-name mobile-clickable',
-                    render: (task) => (
-                      <span title={task.name}>{task.name}</span>
-                    ),
-                  },
-                  {
-                    header: 'Start Date',
-                    attribute: 'start_date',
-                    hideMobile: true,
-                    render: (task) => formatDateShort(getStartDate(task)),
-                  },
-                  {
-                    header: 'End Date',
-                    attribute: 'end_date',
-                    hideMobile: true,
-                    render: (task) => formatDateShort(getEndDate(task)),
-                  },
-                  {
-                    header: 'Status',
-                    attribute: 'status',
-                    hideMobile: true,
-                    render: (task) => (
-                      <span className={`status-badge status-${task.status.toLowerCase().replace(/\s+/g, '-')}`}>
-                        {task.status}
-                      </span>
-                    ),
-                  },
-                  {
-                    header: 'Progress',
-                    attribute: 'progress',
-                    hideMobile: true,
-                    render: (task) => (
-                      <div className="progress-cell">
-                        <div className="progress-bar-small">
-                          <div 
-                            className="progress-bar-fill-small" 
-                            style={{ width: `${task.progress}%` }}
-                          ></div>
-                        </div>
-                        <span className="progress-text">{task.progress}%</span>
-                      </div>
-                    ),
-                    clickable: false,
-                  },
-                  {
-                    header: 'Cost',
-                    attribute: 'expenses_values',
-                    hideMobile: true,
-                    render: (task) => {
-                      const cost = getTaskCost(task);
-                      return (
-                        <span className="task-cost-value">{formatCurrency(cost)}</span>
-                      );
-                    },
-                    clickable: false,
-                  },
-                  {
-                    header: 'Details',
-                    attribute: 'details',
-                    hideMobile: true,
-                    render: (task, value, onRowClick) => (
-                      <button 
-                        className="details-button" 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDetailsClick(task);
-                        }}
-                      >
-                        Details
-                      </button>
-                    ),
-                    clickable: false,
-                  },
-                ]}
-                onRowClick={handleDetailsClick}
-                tableId="project-tasks"
-              />
-            </div>
+            <TasksTable
+              entities={tasks}
+              onRowClick={handleDetailsClick}
+              columnsFilter={['name', 'progress', 'actual_expenses_values', 'planned_expenses_values', 'start_date', 'end_date']}
+            />
           )}
         </div>
-      </div>
+      </GenericScreen>
 
       <div className="add-button-container">
         {isAddMenuOpen && (
@@ -642,7 +532,7 @@ function ProjectDetail() {
         onCreate={handleExpenseCreate}
         projectId={projectId}
       />
-    </div>
+    </>
   );
 }
 

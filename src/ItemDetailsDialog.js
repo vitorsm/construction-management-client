@@ -204,8 +204,7 @@ function ItemDetailsDialog({ isOpen, item, onClose, onUpdate, onDelete, onCreate
   // Build footer buttons for view mode
   const viewModeFooterButtons = item && !isEditMode ? [
     { type: 'delete', onClick: handleDeleteItem, show: true },
-    { type: 'edit', onClick: handleEditItem, show: true },
-    { type: 'close', onClick: onClose, show: true }
+    { type: 'edit', onClick: handleEditItem, show: true }
   ] : [];
 
   const footerButtons = editModeFooterButtons.length > 0 ? editModeFooterButtons : viewModeFooterButtons;

@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import Post from './Post';
+import GenericScreen from './GenericScreen';
 import { checkAuthError } from './apiUtils';
 import { API_BASE_URL } from './config';
 import './Feed.css';
 
 function Feed() {
   const { projectId } = useParams();
-  const navigate = useNavigate();
   
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -91,53 +91,49 @@ function Feed() {
   };
 
   return (
-    <div className="feed-container">
-      <div className="feed-content">
-        <button className="back-button" onClick={() => navigate(`/projects/${projectId}`)}>
-          ← Back
-        </button>
-        <h1>{project ? project.name : 'Project Feed'}</h1>
-        
-        {loading && (
-          <div className="loading-container">
-            <div className="loading-spinner"></div>
-            <p>Loading posts...</p>
-          </div>
-        )}
-        
-        {error && (
-          <div className="error-container">
-            <p className="error-message">{error}</p>
-            <button className="retry-button" onClick={fetchPosts}>
-              Retry
-            </button>
-          </div>
-        )}
-        
-        {!loading && !error && (
-          <>
-            <div className="posts-list">
-              {posts.length === 0 ? (
-                <div className="no-posts">
-                  <p>No posts found.</p>
-                </div>
-              ) : (
-                posts.map(post => (
-                  <Post key={post.id} post={post} />
-                ))
-              )}
-            </div>
-            {posts.length > 0 && (
-              <div className="load-more-container">
-                <button className="load-more-button" onClick={handleLoadMore}>
-                  Load More
-                </button>
+    <GenericScreen
+      title={project ? project.name : 'Project Feed'}
+      backPath={`/projects/${projectId}`}
+    >
+      {loading && (
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <p>Loading posts...</p>
+        </div>
+      )}
+      
+      {error && (
+        <div className="error-container">
+          <p className="error-message">{error}</p>
+          <button className="retry-button" onClick={fetchPosts}>
+            Retry
+          </button>
+        </div>
+      )}
+      
+      {!loading && !error && (
+        <>
+          <div className="posts-list">
+            {posts.length === 0 ? (
+              <div className="no-posts">
+                <p>No posts found.</p>
               </div>
+            ) : (
+              posts.map(post => (
+                <Post key={post.id} post={post} />
+              ))
             )}
-          </>
-        )}
-      </div>
-    </div>
+          </div>
+          {posts.length > 0 && (
+            <div className="load-more-container">
+              <button className="load-more-button" onClick={handleLoadMore}>
+                Load More
+              </button>
+            </div>
+          )}
+        </>
+      )}
+    </GenericScreen>
   );
 }
 

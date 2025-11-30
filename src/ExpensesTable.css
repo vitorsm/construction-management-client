@@ -1,0 +1,138 @@
+.expense-name {
+  font-weight: 600;
+  color: #333;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+}
+
+.expense-name.mobile-clickable {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  border-radius: 8px;
+}
+
+.expense-name.mobile-clickable:hover {
+  background-color: #f0f0f0;
+}
+
+.expense-name.mobile-clickable:active {
+  background-color: #e0e0e0;
+}
+
+.expense-type-badge,
+.expense-class-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.expense-type-badge.expense-type-material {
+  background-color: #ffc107;
+  color: #333;
+}
+
+.expense-type-badge.expense-type-service {
+  background-color: #17a2b8;
+  color: white;
+}
+
+.expense-type-badge.expense-type-labor {
+  background-color: #28a745;
+  color: white;
+}
+
+.expense-type-badge.expense-type-project {
+  background-color: #6f42c1;
+  color: white;
+}
+
+.expense-type-badge.expense-type-document {
+  background-color: #fd7e14;
+  color: white;
+}
+
+.expense-type-badge.expense-type-transport {
+  background-color: #20c997;
+  color: white;
+}
+
+.expense-class-badge.expense-class-planning {
+  background-color: #4dabf7;
+  color: white;
+}
+
+.expense-class-badge.expense-class-execution {
+  background-color: #51cf66;
+  color: white;
+}
+
+.expense-value-cell {
+  font-weight: 600;
+}
+
+.expense-value-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: #28a745;
+}
+
+.expense-date-cell {
+  font-size: 14px;
+}
+
+.expense-date-value {
+  color: #666;
+  font-size: 13px;
+}
+
+.expense-details-button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.expense-details-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.expense-details-button:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 768px) {
+  .expense-name {
+    font-size: 16px;
+    max-width: none;
+    width: 100%;
+  }
+
+  .expense-name.mobile-clickable {
+    cursor: pointer;
+    padding: 16px;
+    transition: background-color 0.2s ease;
+    border-radius: 8px;
+  }
+
+  .expense-name.mobile-clickable:hover {
+    background-color: #f0f0f0;
+  }
+
+  .expense-name.mobile-clickable:active {
+    background-color: #e0e0e0;
+  }
+}
+

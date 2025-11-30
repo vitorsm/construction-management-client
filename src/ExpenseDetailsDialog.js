@@ -45,7 +45,7 @@ function ExpenseDetailsDialog({ isOpen, expense, onClose, onUpdate, onDelete, on
       setEditedExpense({
         name: '',
         expense_type: 'MATERIAL',
-        expense_class: 'PLANNING',
+        expense_class: 'EXECUTION',
         value: '',
         comment: '',
         files: [],
@@ -254,7 +254,7 @@ function ExpenseDetailsDialog({ isOpen, expense, onClose, onUpdate, onDelete, on
     setEditedExpense({
       name: expense.name || '',
       expense_type: expense.expense_type || 'MATERIAL',
-      expense_class: expense.expense_class || 'PLANNING',
+      expense_class: expense.expense_class || 'EXECUTION',
       value: expense.value || '',
       comment: expense.comment || '',
       files: expense.files || [],
@@ -648,8 +648,7 @@ function ExpenseDetailsDialog({ isOpen, expense, onClose, onUpdate, onDelete, on
   // Build footer buttons for view mode
   const viewModeFooterButtons = expense && !isEditMode ? [
     { type: 'delete', onClick: handleDeleteExpense, show: true },
-    { type: 'edit', onClick: handleEditExpense, show: true },
-    { type: 'close', onClick: onClose, show: true }
+    { type: 'edit', onClick: handleEditExpense, show: true }
   ] : [];
 
   const footerButtons = editModeFooterButtons.length > 0 ? editModeFooterButtons : viewModeFooterButtons;
