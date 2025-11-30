@@ -1,0 +1,155 @@
+.entity-table-container {
+  position: relative;
+  overflow-x: auto;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.entity-table-header {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 10;
+}
+
+.entity-table-config-button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  width: 36px;
+  height: 36px;
+  font-size: 18px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  padding: 0;
+}
+
+.entity-table-config-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.entity-table-config-button:active {
+  transform: translateY(0);
+}
+
+.entity-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  font-size: 14px;
+}
+
+.entity-table thead {
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+.entity-table th {
+  padding: 16px;
+  text-align: left;
+  font-weight: 600;
+  color: #333;
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.entity-table tbody tr {
+  border-bottom: 1px solid #f0f0f0;
+  transition: background-color 0.2s ease;
+}
+
+.entity-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.entity-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.entity-table td {
+  padding: 16px;
+  color: #333;
+  vertical-align: middle;
+}
+
+.hide-mobile {
+  display: table-cell;
+}
+
+/* Column Configuration Dialog */
+.column-config-dialog {
+  padding: 24px;
+}
+
+.column-config-description {
+  margin: 0 0 16px 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.column-config-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.column-config-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.column-config-item:hover {
+  background-color: #f5f5f5;
+}
+
+.column-config-item input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #667eea;
+}
+
+.column-config-item span {
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .hide-mobile {
+    display: none;
+  }
+
+  .entity-table {
+    font-size: 12px;
+  }
+
+  .entity-table th,
+  .entity-table td {
+    padding: 12px 8px;
+  }
+
+  .entity-table-header {
+    top: 4px;
+    right: 4px;
+  }
+
+  .entity-table-config-button {
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+  }
+}
+

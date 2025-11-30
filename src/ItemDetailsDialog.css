@@ -1,0 +1,131 @@
+/* Item-specific styles - Dialog base styles are in Dialog.css */
+
+.delayed-label {
+  background: linear-gradient(135deg, #ffe5e5 0%, #ffcccc 100%);
+  color: #c33;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 24px;
+  font-weight: 600;
+  font-size: 14px;
+  border: 2px solid #ff6b6b;
+  text-align: center;
+}
+
+.task-detail-item {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.task-detail-item:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.task-detail-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.task-detail-value {
+  font-size: 16px;
+  color: #333;
+  word-break: break-word;
+}
+
+.task-id-value {
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  color: #555;
+}
+
+.pie-chart-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.pie-chart {
+  transition: transform 0.3s ease;
+}
+
+.pie-chart:hover {
+  transform: scale(1.05);
+}
+
+.pie-chart-progress {
+  transition: stroke-dashoffset 0.5s ease;
+}
+
+.pie-chart-text {
+  font-size: 20px;
+  font-weight: 700;
+  fill: #333;
+}
+
+
+.task-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: border-color 0.3s ease;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.task-input:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.task-input::placeholder {
+  color: #999;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-badge.status-todo {
+  background-color: #ffc107;
+  color: #333;
+}
+
+.status-badge.status-in-progress {
+  background-color: #17a2b8;
+  color: white;
+}
+
+.status-badge.status-done {
+  background-color: #28a745;
+  color: white;
+}
+
+.status-badge.status-completed {
+  background-color: #28a745;
+  color: white;
+}
+
+@media (max-width: 768px) {
+  .task-detail-value {
+    font-size: 14px;
+  }
+}
+

@@ -1,0 +1,29 @@
+/* Daily Report Dialog Styles */
+/* Note: Many dialog styles are shared with ProjectDetail.css */
+/* These styles are specific to the Daily Report dialog if needed */
+
+/* The dialog uses shared styles from ProjectDetail.css:
+   - .dialog-overlay
+   - .dialog-content
+   - .dialog-header
+   - .dialog-close-button
+   - .dialog-body
+   - .dialog-footer
+   - .task-detail-item
+   - .task-detail-label
+   - .task-input
+   - .progress-slider
+   - .photo-upload-container
+   - .photo-select-button
+   - .photos-preview-list
+   - .photo-preview-container
+   - .photo-preview-wrapper
+   - .photo-uploaded-icon
+   - .photo-preview
+   - .photo-preview-actions
+   - .photo-upload-btn
+   - .photo-remove-btn
+   - .dialog-cancel-btn
+   - .dialog-close-btn
+*/
+
