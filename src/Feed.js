@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import Post from './Post';
 import GenericScreen from './GenericScreen';
 import { checkAuthError } from './apiUtils';
@@ -7,6 +8,7 @@ import { API_BASE_URL } from './config';
 import './Feed.css';
 
 function Feed() {
+  const { t } = useTranslation();
   const { projectId } = useParams();
   
   const [posts, setPosts] = useState([]);
@@ -74,7 +76,7 @@ function Feed() {
       setPosts(data || []);
     } catch (err) {
       console.error('Error fetching posts:', err);
-      setError(err.message || 'Failed to load posts. Please try again.');
+      setError(err.message || t('feed.errorLoading'));
     } finally {
       setLoading(false);
     }
@@ -92,13 +94,13 @@ function Feed() {
 
   return (
     <GenericScreen
-      title={project ? project.name : 'Project Feed'}
+      title={project ? project.name : t('feed.title')}
       backPath={`/projects/${projectId}`}
     >
       {loading && (
         <div className="loading-container">
           <div className="loading-spinner"></div>
-          <p>Loading posts...</p>
+          <p>{t('feed.loadingPosts')}</p>
         </div>
       )}
       
@@ -106,7 +108,7 @@ function Feed() {
         <div className="error-container">
           <p className="error-message">{error}</p>
           <button className="retry-button" onClick={fetchPosts}>
-            Retry
+            {t('common.retry')}
           </button>
         </div>
       )}
@@ -116,7 +118,7 @@ function Feed() {
           <div className="posts-list">
             {posts.length === 0 ? (
               <div className="no-posts">
-                <p>No posts found.</p>
+                <p>{t('feed.noPosts')}</p>
               </div>
             ) : (
               posts.map(post => (
@@ -127,7 +129,7 @@ function Feed() {
           {posts.length > 0 && (
             <div className="load-more-container">
               <button className="load-more-button" onClick={handleLoadMore}>
-                Load More
+                {t('feed.loadMore')}
               </button>
             </div>
           )}

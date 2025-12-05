@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { checkAuthError } from './apiUtils';
 import { API_BASE_URL } from './config';
 import TasksSelect from './TasksSelect';
@@ -6,6 +7,7 @@ import Dialog from './Dialog';
 import './DailyReport.css';
 
 function DailyReport({ isOpen, onClose, tasks, onSuccess }) {
+  const { t } = useTranslation();
   // Flatten tasks recursively to include all children
   const flattenTasks = useMemo(() => {
     const flatten = (taskList) => {
@@ -109,7 +111,7 @@ function DailyReport({ isOpen, onClose, tasks, onSuccess }) {
 
   const handleUploadPhoto = async (photoIndex) => {
     if (!selectedPhotos[photoIndex] || !taskHistory.task_id) {
-      alert('Please select a task and a photo to upload');
+      alert(t('dailyReport.selectTaskAndPhoto'));
       return;
     }
 
@@ -117,7 +119,7 @@ function DailyReport({ isOpen, onClose, tasks, onSuccess }) {
       const token = localStorage.getItem('access_token');
       
       if (!token) {
-        throw new Error('No access token found. Please login again.');
+        throw new Error(t('errors.noAccessToken'));
       }
 
     console.log("taskHistory", taskHistory)
@@ -139,7 +141,7 @@ function DailyReport({ isOpen, onClose, tasks, onSuccess }) {
         if (checkAuthError(response)) {
           return;
         }
-        throw new Error(`Failed to upload photo: ${response.status} ${response.statusText}`);
+        throw new Error(t('dailyReport.errorUploadingPhoto', { status: response.status, statusText: response.statusText }));
       }
 
       const responseData = await response.json();
@@ -158,7 +160,7 @@ function DailyReport({ isOpen, onClose, tasks, onSuccess }) {
       }
     } catch (err) {
       console.error('Error uploading photo:', err);
-      alert(err.message || 'An error occurred while uploading the photo');
+      alert(err.message || t('dailyReport.errorUploadingPhotoGeneric'));
     }
   };
 
@@ -214,7 +216,7 @@ function DailyReport({ isOpen, onClose, tasks, onSuccess }) {
       const token = localStorage.getItem('access_token');
       
       if (!token) {
-        throw new Error('No access token found. Please login again.');
+        throw new Error(t('errors.noAccessToken'));
       }
 
       const taskHistoryData = {
@@ -237,7 +239,7 @@ function DailyReport({ isOpen, onClose, tasks, onSuccess }) {
         if (checkAuthError(response)) {
           return;
         }
-        throw new Error(`Failed to create task history: ${response.status} ${response.statusText}`);
+        throw new Error(t('dailyReport.errorCreatingWithStatus', { status: response.status, statusText: response.statusText }));
       }
 
       // Close dialog and notify parent
@@ -247,7 +249,7 @@ function DailyReport({ isOpen, onClose, tasks, onSuccess }) {
       }
     } catch (err) {
       console.error('Error creating task history:', err);
-      alert(err.message || 'An error occurred while creating the task history');
+      alert(err.message || t('dailyReport.errorCreating'));
     }
   };
 
@@ -259,7 +261,7 @@ function DailyReport({ isOpen, onClose, tasks, onSuccess }) {
     },
     {
       type: 'save',
-      label: 'Create Task History',
+      label: t('dailyReport.createTaskHistory'),
       formSubmit: true,
       formId: formId
     }
@@ -268,14 +270,14 @@ function DailyReport({ isOpen, onClose, tasks, onSuccess }) {
   return (
     <Dialog
       isOpen={isOpen}
-      title="Daily Report"
+      title={t('dailyReport.title')}
       onClose={handleClose}
       footerButtons={footerButtons}
     >
       <form id={formId} onSubmit={handleCreateTaskHistory}>
         <div className="dialog-body">
           <div className="task-detail-item">
-            <label className="task-detail-label" htmlFor="task-history-task">Task *</label>
+            <label className="task-detail-label" htmlFor="task-history-task">{t('dailyReport.task')} *</label>
             <TasksSelect
               id="task-history-task"
               tasks={tasks}
@@ -297,7 +299,7 @@ function DailyReport({ isOpen, onClose, tasks, onSuccess }) {
           </div>
           
           <div className="task-detail-item">
-            <label className="task-detail-label" htmlFor="task-history-status">Status</label>
+            <label className="task-detail-label" htmlFor="task-history-status">{t('dailyReport.status')}</label>
             <select
               id="task-history-status"
               className="task-input"
@@ -311,14 +313,14 @@ function DailyReport({ isOpen, onClose, tasks, onSuccess }) {
                 });
               }}
             >
-              <option value="TODO">Not Started</option>
-              <option value="IN_PROGRESS">In Progress</option>
-              <option value="DONE">Completed</option>
+              <option value="TODO">{t('taskDetails.notStarted')}</option>
+              <option value="IN_PROGRESS">{t('taskDetails.inProgress')}</option>
+              <option value="DONE">{t('taskDetails.completed')}</option>
             </select>
           </div>
           <div className="task-detail-item">
             <label className="task-detail-label" htmlFor="task-history-progress">
-              Progress: {taskHistory.progress || '0'}%
+              {t('dailyReport.progress', { progress: taskHistory.progress || '0' })}
             </label>
             <input
               type="range"
@@ -332,18 +334,18 @@ function DailyReport({ isOpen, onClose, tasks, onSuccess }) {
             />
           </div>
           <div className="task-detail-item">
-            <label className="task-detail-label" htmlFor="task-history-comment">Comment</label>
+            <label className="task-detail-label" htmlFor="task-history-comment">{t('dailyReport.comment')}</label>
             <textarea
               id="task-history-comment"
               className="task-input"
               value={taskHistory.comment}
               onChange={(e) => setTaskHistory({ ...taskHistory, comment: e.target.value })}
               rows="4"
-              placeholder="Enter a comment about the task progress"
+              placeholder={t('dailyReport.commentPlaceholder')}
             />
           </div>
           <div className="task-detail-item">
-            <label className="task-detail-label">Photos</label>
+            <label className="task-detail-label">{t('dailyReport.photos')}</label>
             <div className="photo-upload-container">
               <input
                 type="file"
@@ -354,7 +356,7 @@ function DailyReport({ isOpen, onClose, tasks, onSuccess }) {
                 style={{ display: 'none' }}
               />
               <label htmlFor="task-history-photo" className="photo-select-button">
-                Add Photos
+                {t('dailyReport.addPhotos')}
               </label>
               {photoPreviews.length > 0 && (
                 <div className="photos-preview-list">
@@ -377,14 +379,14 @@ function DailyReport({ isOpen, onClose, tasks, onSuccess }) {
                             onClick={() => handleUploadPhoto(index)}
                             disabled={!taskHistory.task_id || isUploaded}
                           >
-                            {isUploaded ? 'Uploaded' : 'Upload'}
+                            {isUploaded ? t('common.uploaded') : t('common.upload')}
                           </button>
                           <button
                             type="button"
                             className="photo-remove-btn"
                             onClick={() => handleRemovePhoto(index)}
                           >
-                            Remove
+                            {t('common.remove')}
                           </button>
                         </div>
                       </div>

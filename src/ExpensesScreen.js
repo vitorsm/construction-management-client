@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { checkAuthError } from './apiUtils';
 import { API_BASE_URL } from './config';
 import ExpenseDetailsDialog from './ExpenseDetailsDialog';
@@ -8,6 +9,7 @@ import ExpensesTable from './ExpensesTable';
 import './ExpensesScreen.css';
 
 function ExpensesScreen() {
+  const { t } = useTranslation();
   const { projectId } = useParams();
   const [items, setItems] = useState([]);
 
@@ -121,7 +123,7 @@ function ExpensesScreen() {
   };
 
   const formatCurrency = (value) => {
-    if (!value && value !== 0) return 'N/A';
+    if (!value && value !== 0) return t('common.noData');
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
@@ -135,8 +137,8 @@ function ExpensesScreen() {
     const count = expenses.length;
     
     return [
-      { label: 'Total Expenses', value: formatCurrency(total) },
-      { label: 'Number of Expenses', value: count },
+      { label: t('expenses.totalExpenses'), value: formatCurrency(total) },
+      { label: t('expenses.numberOfExpenses'), value: count },
     ];
   };
 
@@ -147,30 +149,30 @@ function ExpensesScreen() {
   const filterConfig = [
     {
       type: 'multiselect',
-      label: 'Expense Class',
+      label: t('expenses.expenseClass'),
       stateKey: 'selectedExpenseClasses',
       options: ['PLANNING', 'EXECUTION'],
-      placeholder: 'Select expense classes...',
+      placeholder: t('expenses.selectExpenseClasses'),
     },
     {
       type: 'multiselect',
-      label: 'Expense Type',
+      label: t('expenses.expenseType'),
       stateKey: 'selectedExpenseTypes',
       options: ['MATERIAL', 'SERVICE', 'LABOR', 'PROJECT', 'DOCUMENT', 'TRANSPORT'],
-      placeholder: 'Select expense types...',
+      placeholder: t('expenses.selectExpenseTypes'),
     },
     {
       type: 'multiselect',
-      label: 'Items',
+      label: t('expenses.items'),
       stateKey: 'selectedItemIds',
       options: items,
-      placeholder: 'Select items...',
+      placeholder: t('expenses.selectItems'),
       getOptionLabel: (item) => item.name,
       getOptionValue: (item) => item.id,
     },
     {
       type: 'date-range',
-      label: 'Date Interval',
+      label: t('expenses.dateInterval'),
       stateKey: 'dateInterval',
       fullWidth: true,
     },
@@ -178,21 +180,21 @@ function ExpensesScreen() {
 
   return (
     <EntitiesScreen
-      title="Expenses"
+      title={t('expenses.title')}
       entityName="expenses"
       backPath={`/projects/${projectId}/dashboard`}
       fetchEntities={fetchExpenses}
       filterConfig={filterConfig}
       tableComponent={ExpensesTable}
       summaryConfig={getSummaryConfig}
-      createButtonText="+ Create Expense"
+      createButtonText={t('expenses.createExpense')}
       detailsDialog={ExpenseDetailsDialog}
       detailsDialogProps={{
         availableItems: items,
         onItemsRefresh: fetchItems,
       }}
-      emptyMessage="No expenses found. Create your first expense to get started."
-      loadingMessage="Loading expenses..."
+      emptyMessage={t('expenses.noExpenses')}
+      loadingMessage={t('expenses.loadingExpenses')}
       filterEntities={filterEntities}
     />
   );

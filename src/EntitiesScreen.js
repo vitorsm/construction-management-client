@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { checkAuthError } from './apiUtils';
 import { API_BASE_URL } from './config';
 import MultiSelect from './MultiSelect';
@@ -27,6 +28,7 @@ function EntitiesScreen({
   projectId: propProjectId,
   tableComponent: TableComponent,
 }) {
+  const { t } = useTranslation();
   const { projectId: paramProjectId } = useParams();
   const projectId = propProjectId || paramProjectId;
   
@@ -63,7 +65,7 @@ function EntitiesScreen({
       const token = localStorage.getItem('access_token');
       
       if (!token) {
-        throw new Error('No access token found. Please login again.');
+        throw new Error(t('errors.noAccessToken'));
       }
 
       const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}`, {
@@ -78,7 +80,7 @@ function EntitiesScreen({
         if (checkAuthError(response)) {
           return;
         }
-        throw new Error(`Failed to fetch project: ${response.status} ${response.statusText}`);
+        throw new Error(t('entitiesScreen.failedToFetchProject', { status: response.status, statusText: response.statusText }));
       }
 
       const data = await response.json();
@@ -86,7 +88,7 @@ function EntitiesScreen({
     } catch (err) {
       console.error('Error fetching project:', err);
     }
-  }, [projectId]);
+  }, [projectId, t]);
 
   const loadEntities = useCallback(async () => {
     try {
@@ -95,12 +97,12 @@ function EntitiesScreen({
       const data = await fetchEntities(projectId);
       setEntities(data || []);
     } catch (err) {
-      setError(err.message || errorMessage || 'An error occurred while fetching data');
+      setError(err.message || errorMessage || t('entities.error'));
       console.error(`Error fetching ${entityName}:`, err);
     } finally {
       setLoading(false);
     }
-  }, [fetchEntities, projectId, entityName, errorMessage]);
+  }, [fetchEntities, projectId, entityName, errorMessage, t]);
 
   useEffect(() => {
     fetchProject();
@@ -198,7 +200,7 @@ function EntitiesScreen({
               className="entities-filter-toggle-button"
               onClick={() => setShowFilters(!showFilters)}
             >
-              {showFilters ? '▼ Hide Filters' : '▶ Show Filters'}
+              {showFilters ? t('entitiesScreen.hideFilters') : t('entitiesScreen.showFilters')}
             </button>
           </div>
         )}
@@ -222,7 +224,7 @@ function EntitiesScreen({
                 {filter.type === 'date-range' && (
                   <div className="entities-date-inputs">
                     <div className="entities-date-input-wrapper">
-                      <label className="entities-date-label">From</label>
+                      <label className="entities-date-label">{t('entitiesScreen.from')}</label>
                       <input
                         type="date"
                         className="entities-date-input"
@@ -231,7 +233,7 @@ function EntitiesScreen({
                       />
                     </div>
                     <div className="entities-date-input-wrapper">
-                      <label className="entities-date-label">To</label>
+                      <label className="entities-date-label">{t('entitiesScreen.to')}</label>
                       <input
                         type="date"
                         className="entities-date-input"
@@ -250,9 +252,9 @@ function EntitiesScreen({
                 <button
                   className="entities-filter-refresh-button"
                   onClick={handleRefresh}
-                  title={`Refresh ${entityName} with current filters`}
+                  title={t('entities.refreshWithFilters', { entityName })}
                 >
-                  🔄 Refresh
+                  {t('common.refresh')}
                 </button>
               )}
               <button
@@ -260,7 +262,7 @@ function EntitiesScreen({
                 onClick={handleClearFilters}
                 disabled={!hasActiveFilters()}
               >
-                Clear Filters
+                {t('entitiesScreen.clearFilters')}
               </button>
             </div>
           </div>
@@ -296,15 +298,15 @@ function EntitiesScreen({
 
         <div className="entities-section">
           {loading ? (
-            <div className="entities-loading">{loadingMessage || `Loading ${entityName}...`}</div>
+            <div className="entities-loading">{loadingMessage || t('entities.loading', { entityName })}</div>
           ) : error ? (
             <div className="entities-error">{error}</div>
           ) : (
             filteredEntities.length === 0 ? (
               <div className="no-entities">
                 {entities.length === 0 
-                  ? (emptyMessage || `No ${entityName} found. Create your first ${entityName} to get started.`)
-                  : (noFilterMatchMessage || `No ${entityName} match the current filters.`)}
+                  ? (emptyMessage || t('entities.noEntities', { entityName }))
+                  : (noFilterMatchMessage || t('entities.noFilterMatch', { entityName }))}
               </div>
             ) : (
               // Use custom table component if provided, otherwise check if tableConfig uses EntityTable (columns have 'attribute' property) or renderRows

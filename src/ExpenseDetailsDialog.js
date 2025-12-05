@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { checkAuthError } from './apiUtils';
 import { API_BASE_URL } from './config';
 import Dialog from './Dialog';
@@ -7,6 +8,7 @@ import TasksSelect from './TasksSelect';
 import './ExpenseDetailsDialog.css';
 
 function ExpenseDetailsDialog({ isOpen, expense, onClose, onUpdate, onDelete, onCreate, projectId, availableItems = [], onItemsRefresh, initialTaskId }) {
+  const { t } = useTranslation();
   const [isEditMode, setIsEditMode] = useState(false);
   const [editedExpense, setEditedExpense] = useState(null);
   const [selectedPhotos, setSelectedPhotos] = useState([]);
@@ -299,7 +301,7 @@ function ExpenseDetailsDialog({ isOpen, expense, onClose, onUpdate, onDelete, on
 
   const handleUploadPhoto = async (photoIndex) => {
     if (!selectedPhotos[photoIndex]) {
-      alert('Please select a photo to upload');
+      alert(t('expenseDetails.selectPhotoToUpload'));
       return;
     }
 
@@ -345,7 +347,7 @@ function ExpenseDetailsDialog({ isOpen, expense, onClose, onUpdate, onDelete, on
       }
     } catch (err) {
       console.error('Error uploading photo:', err);
-      alert(err.message || 'An error occurred while uploading the photo');
+      alert(err.message || t('expenseDetails.errorUploadingPhoto'));
     }
   };
 
@@ -519,7 +521,7 @@ function ExpenseDetailsDialog({ isOpen, expense, onClose, onUpdate, onDelete, on
       }
     } catch (err) {
       console.error('Error creating expense:', err);
-      alert(err.message || 'An error occurred while creating the expense');
+      alert(err.message || t('expenseDetails.errorCreating'));
     }
   };
 
@@ -577,14 +579,14 @@ function ExpenseDetailsDialog({ isOpen, expense, onClose, onUpdate, onDelete, on
       }
     } catch (err) {
       console.error('Error updating expense:', err);
-      alert(err.message || 'An error occurred while updating the expense');
+      alert(err.message || t('expenseDetails.errorUpdating'));
     }
   };
 
   const handleDeleteExpense = async () => {
     if (!expense) return;
     
-    const confirmed = window.confirm(`Are you sure you want to delete the expense "${expense.name}"? This action cannot be undone.`);
+    const confirmed = window.confirm(t('expenseDetails.deleteConfirm', { expenseName: expense.name }));
     
     if (!confirmed) return;
 
@@ -621,11 +623,11 @@ function ExpenseDetailsDialog({ isOpen, expense, onClose, onUpdate, onDelete, on
       }
     } catch (err) {
       console.error('Error deleting expense:', err);
-      alert(err.message || 'An error occurred while deleting the expense');
+      alert(err.message || t('expenseDetails.errorDeleting'));
     }
   };
 
-  const dialogTitle = isCreateMode ? 'Create Expense' : isEditMode ? 'Edit Expense' : 'Expense Details';
+  const dialogTitle = isCreateMode ? t('expenseDetails.createExpense') : isEditMode ? t('expenseDetails.editExpense') : t('expenseDetails.expenseDetails');
 
   // Build footer buttons for edit/create mode
   const editModeFooterButtons = isEditMode && editedExpense ? [
@@ -637,7 +639,7 @@ function ExpenseDetailsDialog({ isOpen, expense, onClose, onUpdate, onDelete, on
     },
     { 
       type: 'save', 
-      label: isCreateMode ? 'Create Expense' : 'Save',
+      label: isCreateMode ? t('expenseDetails.createExpense') : t('common.save'),
       formSubmit: true,
       formId: 'expense-form',
       onClick: undefined,
@@ -659,7 +661,7 @@ function ExpenseDetailsDialog({ isOpen, expense, onClose, onUpdate, onDelete, on
         <div className="image-modal-overlay" onClick={closeImageModal}>
           <div className="image-modal-content" onClick={(e) => e.stopPropagation()}>
             <button className="image-modal-close" onClick={closeImageModal}>×</button>
-            <img src={selectedImageUrl} alt="Full size" />
+            <img src={selectedImageUrl} alt={t('expenseDetails.expenseDetails')} />
           </div>
         </div>
       )}
@@ -674,12 +676,12 @@ function ExpenseDetailsDialog({ isOpen, expense, onClose, onUpdate, onDelete, on
             <div className="dialog-body">
               {!isCreateMode && (
                 <div className="expense-detail-item">
-                  <span className="expense-detail-label">ID:</span>
+                  <span className="expense-detail-label">{t('expenseDetails.id')}</span>
                   <span className="expense-detail-value expense-id-value">{expense.id}</span>
                 </div>
               )}
               <div className="expense-detail-item">
-                <label className="expense-detail-label" htmlFor="edit-expense-name">Name *</label>
+                <label className="expense-detail-label" htmlFor="edit-expense-name">{t('expenseDetails.name')} *</label>
                 <input
                   type="text"
                   id="edit-expense-name"
@@ -687,39 +689,39 @@ function ExpenseDetailsDialog({ isOpen, expense, onClose, onUpdate, onDelete, on
                   value={editedExpense.name}
                   onChange={(e) => setEditedExpense({ ...editedExpense, name: e.target.value })}
                   required
-                  placeholder={isCreateMode ? "Enter expense name" : ""}
+                  placeholder={isCreateMode ? t('expenseDetails.namePlaceholder') : ""}
                 />
               </div>
               <div className="expense-detail-item">
-                <label className="expense-detail-label" htmlFor="edit-expense-type">Expense Type</label>
+                <label className="expense-detail-label" htmlFor="edit-expense-type">{t('expenseDetails.expenseType')}</label>
                 <select
                   id="edit-expense-type"
                   className="expense-input"
                   value={editedExpense.expense_type}
                   onChange={(e) => setEditedExpense({ ...editedExpense, expense_type: e.target.value })}
                 >
-                  <option value="MATERIAL">Material</option>
-                  <option value="SERVICE">Service</option>
-                  <option value="LABOR">Labor</option>
-                  <option value="PROJECT">Project</option>
-                  <option value="DOCUMENT">Document</option>
-                  <option value="TRANSPORT">Transport</option>
+                  <option value="MATERIAL">{t('expenseTypes.MATERIAL')}</option>
+                  <option value="SERVICE">{t('expenseTypes.SERVICE')}</option>
+                  <option value="LABOR">{t('expenseTypes.LABOR')}</option>
+                  <option value="PROJECT">{t('expenseTypes.PROJECT')}</option>
+                  <option value="DOCUMENT">{t('expenseTypes.DOCUMENT')}</option>
+                  <option value="TRANSPORT">{t('expenseTypes.TRANSPORT')}</option>
                 </select>
               </div>
               <div className="expense-detail-item">
-                <label className="expense-detail-label" htmlFor="edit-expense-class">Expense Class</label>
+                <label className="expense-detail-label" htmlFor="edit-expense-class">{t('expenseDetails.expenseClass')}</label>
                 <select
                   id="edit-expense-class"
                   className="expense-input"
                   value={editedExpense.expense_class}
                   onChange={(e) => setEditedExpense({ ...editedExpense, expense_class: e.target.value })}
                 >
-                  <option value="PLANNING">Planning</option>
-                  <option value="EXECUTION">Execution</option>
+                  <option value="PLANNING">{t('expenseClasses.PLANNING')}</option>
+                  <option value="EXECUTION">{t('expenseClasses.EXECUTION')}</option>
                 </select>
               </div>
               <div className="expense-detail-item">
-                <label className="expense-detail-label" htmlFor="edit-expense-value">Value *</label>
+                <label className="expense-detail-label" htmlFor="edit-expense-value">{t('expenseDetails.value')} *</label>
                 <input
                   type="number"
                   id="edit-expense-value"
@@ -729,11 +731,11 @@ function ExpenseDetailsDialog({ isOpen, expense, onClose, onUpdate, onDelete, on
                   min="0"
                   step="0.01"
                   required
-                  placeholder={isCreateMode ? "0.00" : ""}
+                  placeholder={isCreateMode ? t('expenseDetails.valuePlaceholder') : ""}
                 />
               </div>
               <div className="expense-detail-item">
-                <label className="expense-detail-label" htmlFor="edit-expense-task">Task</label>
+                <label className="expense-detail-label" htmlFor="edit-expense-task">{t('expenseDetails.task')}</label>
                 <TasksSelect
                   id="edit-expense-task"
                   tasks={tasks}
@@ -744,18 +746,18 @@ function ExpenseDetailsDialog({ isOpen, expense, onClose, onUpdate, onDelete, on
                 />
               </div>
               <div className="expense-detail-item">
-                <label className="expense-detail-label" htmlFor="edit-expense-comment">Comment</label>
+                <label className="expense-detail-label" htmlFor="edit-expense-comment">{t('expenseDetails.comment')}</label>
                 <textarea
                   id="edit-expense-comment"
                   className="expense-input expense-textarea"
                   value={editedExpense.comment}
                   onChange={(e) => setEditedExpense({ ...editedExpense, comment: e.target.value })}
                   rows="4"
-                  placeholder={isCreateMode ? "Enter expense comment (optional)" : ""}
+                  placeholder={isCreateMode ? t('expenseDetails.commentPlaceholder') : ""}
                 />
               </div>
               <div className="expense-detail-item">
-                <label className="expense-detail-label">Items</label>
+                <label className="expense-detail-label">{t('expenseDetails.items')}</label>
                 <div className="items-container">
                   <div className="items-add-section">
                     <div className="items-select-container" ref={itemSelectRef}>
@@ -764,7 +766,7 @@ function ExpenseDetailsDialog({ isOpen, expense, onClose, onUpdate, onDelete, on
                         className="items-select-button"
                         onClick={() => setIsItemSelectOpen(!isItemSelectOpen)}
                       >
-                        <span>Select an item to add...</span>
+                        <span>{t('expenseDetails.selectItemToAdd')}</span>
                         <span className="items-select-arrow">{isItemSelectOpen ? '▲' : '▼'}</span>
                       </button>
                       {isItemSelectOpen && (
@@ -773,7 +775,7 @@ function ExpenseDetailsDialog({ isOpen, expense, onClose, onUpdate, onDelete, on
                             <input
                               type="text"
                               className="items-select-search-input"
-                              placeholder="Search items..."
+                              placeholder={t('expenseDetails.searchItems')}
                               value={itemSearchQuery}
                               onChange={(e) => setItemSearchQuery(e.target.value)}
                               autoFocus
@@ -782,9 +784,9 @@ function ExpenseDetailsDialog({ isOpen, expense, onClose, onUpdate, onDelete, on
                               type="button"
                               className="items-create-button-small"
                               onClick={handleOpenCreateItemDialog}
-                              title="Create new item"
+                              title={t('items.createItem')}
                             >
-                              + New
+                              {t('expenseDetails.newItem')}
                             </button>
                           </div>
                           <div className="items-select-options">
@@ -800,7 +802,7 @@ function ExpenseDetailsDialog({ isOpen, expense, onClose, onUpdate, onDelete, on
                               ))
                             ) : (
                               <div className="items-select-empty">
-                                {itemSearchQuery ? 'No items found' : 'No items available'}
+                                {itemSearchQuery ? t('expenseDetails.noItemsFound') : t('expenseDetails.noItemsAvailable')}
                               </div>
                             )}
                           </div>
@@ -821,20 +823,20 @@ function ExpenseDetailsDialog({ isOpen, expense, onClose, onUpdate, onDelete, on
                             className="item-remove-btn"
                             onClick={() => handleRemoveItem(index)}
                           >
-                            Remove
+                            {t('common.remove')}
                           </button>
                         </div>
                       ))}
                     </div>
                   ) : (
                     <span className="expense-detail-value" style={{ marginTop: '12px', color: '#999' }}>
-                      No items added
+                      {t('expenseDetails.noItemsAdded')}
                     </span>
                   )}
                 </div>
               </div>
               <div className="expense-detail-item">
-                <label className="expense-detail-label">Photos</label>
+                <label className="expense-detail-label">{t('expenseDetails.photos')}</label>
                 <div className="photo-upload-container">
                   <input
                     type="file"
@@ -845,7 +847,7 @@ function ExpenseDetailsDialog({ isOpen, expense, onClose, onUpdate, onDelete, on
                     style={{ display: 'none' }}
                   />
                   <label htmlFor="expense-photo" className="photo-select-button">
-                    Add Photos
+                    {t('expenseDetails.addPhotos')}
                   </label>
                   {photoPreviews.length > 0 && (
                     <div className="photos-preview-list">
@@ -868,14 +870,14 @@ function ExpenseDetailsDialog({ isOpen, expense, onClose, onUpdate, onDelete, on
                                 onClick={() => handleUploadPhoto(index)}
                                 disabled={isUploaded}
                               >
-                                {isUploaded ? 'Uploaded' : 'Upload'}
+                                {isUploaded ? t('common.uploaded') : t('common.upload')}
                               </button>
                               <button
                                 type="button"
                                 className="photo-remove-btn"
                                 onClick={() => handleRemovePhoto(index)}
                               >
-                                Remove
+                                {t('common.remove')}
                               </button>
                             </div>
                           </div>
@@ -891,51 +893,51 @@ function ExpenseDetailsDialog({ isOpen, expense, onClose, onUpdate, onDelete, on
           <>
             <div className="dialog-body">
               <div className="expense-detail-item">
-                <span className="expense-detail-label">ID:</span>
+                <span className="expense-detail-label">{t('expenseDetails.id')}</span>
                 <span className="expense-detail-value expense-id-value">{expense.id}</span>
               </div>
               <div className="expense-detail-item">
-                <span className="expense-detail-label">Name:</span>
+                <span className="expense-detail-label">{t('expenseDetails.name')}:</span>
                 <span className="expense-detail-value">{expense.name}</span>
               </div>
               <div className="expense-detail-item">
-                <span className="expense-detail-label">Project:</span>
+                <span className="expense-detail-label">{t('expenseDetails.project')}</span>
                 <span className="expense-detail-value">
-                  {expense.project?.name || projectId || 'N/A'}
+                  {expense.project?.name || projectId || t('common.noData')}
                 </span>
               </div>
               <div className="expense-detail-item">
-                <span className="expense-detail-label">Expense Type:</span>
+                <span className="expense-detail-label">{t('expenseDetails.expenseType')}:</span>
                 <span className={`expense-type-badge expense-type-${expense.expense_type?.toLowerCase()}`}>
-                  {expense.expense_type}
+                  {expense.expense_type ? t(`expenseTypes.${expense.expense_type}`) : expense.expense_type}
                 </span>
               </div>
               <div className="expense-detail-item">
-                <span className="expense-detail-label">Expense Class:</span>
+                <span className="expense-detail-label">{t('expenseDetails.expenseClass')}:</span>
                 <span className={`expense-class-badge expense-class-${expense.expense_class?.toLowerCase()}`}>
-                  {expense.expense_class}
+                  {expense.expense_class ? t(`expenseClasses.${expense.expense_class}`) : expense.expense_class}
                 </span>
               </div>
               <div className="expense-detail-item">
-                <span className="expense-detail-label">Value:</span>
+                <span className="expense-detail-label">{t('expenseDetails.value')}:</span>
                 <span className="expense-detail-value expense-value-value">
                   {formatCurrency(expense.value)}
                 </span>
               </div>
               <div className="expense-detail-item">
-                <span className="expense-detail-label">Task:</span>
+                <span className="expense-detail-label">{t('expenseDetails.task')}:</span>
                 <span className="expense-detail-value">
-                  {expense.task?.name || (expense.task_id ? 'N/A' : 'No task assigned')}
+                  {expense.task?.name || (expense.task_id ? t('common.noData') : t('expenseDetails.noTaskAssigned'))}
                 </span>
               </div>
               <div className="expense-detail-item">
-                <span className="expense-detail-label">Comment:</span>
+                <span className="expense-detail-label">{t('expenseDetails.comment')}:</span>
                 <span className="expense-detail-value">
-                  {expense.comment || 'N/A'}
+                  {expense.comment || t('common.noData')}
                 </span>
               </div>
               <div className="expense-detail-item">
-                <span className="expense-detail-label">Items:</span>
+                <span className="expense-detail-label">{t('expenseDetails.items')}:</span>
                 {expense.items && expense.items.length > 0 ? (
                   <div className="items-list">
                     {expense.items.map((item, index) => (
@@ -948,11 +950,11 @@ function ExpenseDetailsDialog({ isOpen, expense, onClose, onUpdate, onDelete, on
                     ))}
                   </div>
                 ) : (
-                  <span className="expense-detail-value">No items</span>
+                  <span className="expense-detail-value">{t('expenseDetails.noItems')}</span>
                 )}
               </div>
               <div className="expense-detail-item">
-                <span className="expense-detail-label">Photos:</span>
+                <span className="expense-detail-label">{t('expenseDetails.photos')}:</span>
                 {expense.files && expense.files.length > 0 ? (
                   <div className="expense-files">
                     {expense.files.map((fileId, index) => {
@@ -964,12 +966,12 @@ function ExpenseDetailsDialog({ isOpen, expense, onClose, onUpdate, onDelete, on
                           {isLoading ? (
                             <div className="expense-file-loading">
                               <div className="expense-file-loading-spinner"></div>
-                              <p>Loading...</p>
+                              <p>{t('expenseDetails.loading')}</p>
                             </div>
                           ) : imageUrl ? (
                             <img 
                               src={imageUrl} 
-                              alt={`Expense file ${index + 1}`}
+                              alt={`${t('expenseDetails.expenseDetails')} ${index + 1}`}
                               onClick={() => openImageModal(imageUrl)}
                               onError={(e) => {
                                 e.target.src = 'https://via.placeholder.com/300x200?text=Image+Not+Found';
@@ -977,7 +979,7 @@ function ExpenseDetailsDialog({ isOpen, expense, onClose, onUpdate, onDelete, on
                             />
                           ) : (
                             <div className="expense-file-error">
-                              <p>Failed to load image</p>
+                              <p>{t('expenseDetails.failedToLoadImage')}</p>
                             </div>
                           )}
                         </div>
@@ -985,7 +987,7 @@ function ExpenseDetailsDialog({ isOpen, expense, onClose, onUpdate, onDelete, on
                     })}
                   </div>
                 ) : (
-                  <span className="expense-detail-value">No photos</span>
+                  <span className="expense-detail-value">{t('expenseDetails.noPhotos')}</span>
                 )}
               </div>
             </div>

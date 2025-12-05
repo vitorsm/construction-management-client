@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import './GenericScreen.css';
 
 function GenericScreen({ 
@@ -8,6 +9,7 @@ function GenericScreen({
   optionsMenu = [],
   children 
 }) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -41,7 +43,7 @@ function GenericScreen({
             className="generic-screen-back-button"
             onClick={handleBackClick}
           >
-            ← Back
+            {t('common.back')}
           </button>
         )}
         

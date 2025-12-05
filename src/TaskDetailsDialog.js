@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { checkAuthError } from './apiUtils';
 import { API_BASE_URL } from './config';
 import Dialog from './Dialog';
@@ -7,6 +8,7 @@ import ExpensesTable from './ExpensesTable';
 import './TaskDetailsDialog.css';
 
 function TaskDetailsDialog({ isOpen, task, onClose, onUpdate, onDelete, onCreate, projectId, parentTaskId }) {
+  const { t } = useTranslation();
   const [isEditMode, setIsEditMode] = useState(false);
   const [editedTask, setEditedTask] = useState(null);
   const [viewingChildTask, setViewingChildTask] = useState(null);
@@ -257,7 +259,7 @@ function TaskDetailsDialog({ isOpen, task, onClose, onUpdate, onDelete, onCreate
       }
     } catch (err) {
       console.error('Error creating task:', err);
-      alert(err.message || 'An error occurred while creating the task');
+      alert(err.message || t('taskDetails.errorCreating'));
     }
   };
 
@@ -318,7 +320,7 @@ function TaskDetailsDialog({ isOpen, task, onClose, onUpdate, onDelete, onCreate
       }
     } catch (err) {
       console.error('Error updating task:', err);
-      alert(err.message || 'An error occurred while updating the task');
+      alert(err.message || t('taskDetails.errorUpdating'));
     }
   };
 
@@ -326,7 +328,7 @@ function TaskDetailsDialog({ isOpen, task, onClose, onUpdate, onDelete, onCreate
     const currentTask = getCurrentTask();
     if (!currentTask) return;
     
-    const confirmed = window.confirm(`Are you sure you want to delete the task "${currentTask.name}"? This action cannot be undone.`);
+    const confirmed = window.confirm(t('taskDetails.deleteConfirm', { taskName: currentTask.name }));
     
     if (!confirmed) return;
 
@@ -365,7 +367,7 @@ function TaskDetailsDialog({ isOpen, task, onClose, onUpdate, onDelete, onCreate
       }
     } catch (err) {
       console.error('Error deleting task:', err);
-      alert(err.message || 'An error occurred while deleting the task');
+      alert(err.message || t('taskDetails.errorDeleting'));
     }
   };
 
@@ -438,10 +440,10 @@ function TaskDetailsDialog({ isOpen, task, onClose, onUpdate, onDelete, onCreate
   };
 
   const dialogTitle = isCreateMode 
-    ? (isCreatingChildTask ? 'Create Child Task' : 'Create Task')
+    ? (isCreatingChildTask ? t('taskDetails.createChildTask') : t('taskDetails.createTask'))
     : isEditMode 
-      ? 'Edit Task' 
-      : 'Task Details';
+      ? t('taskDetails.editTask')
+      : t('taskDetails.taskDetails');
 
   // Build footer buttons for edit/create mode
   const editModeFooterButtons = isEditMode && editedTask ? [
@@ -453,7 +455,7 @@ function TaskDetailsDialog({ isOpen, task, onClose, onUpdate, onDelete, onCreate
     },
     { 
       type: 'save', 
-      label: isCreateMode ? (isCreatingChildTask ? 'Create Child Task' : 'Create Task') : 'Save',
+      label: isCreateMode ? (isCreatingChildTask ? t('taskDetails.createChildTask') : t('taskDetails.createTask')) : t('common.save'),
       formSubmit: true,
       formId: 'task-form',
       onClick: undefined,
@@ -482,11 +484,11 @@ function TaskDetailsDialog({ isOpen, task, onClose, onUpdate, onDelete, onCreate
             <div className="dialog-body">
               {isCreatingChildTask && task && (
                 <div className="creating-child-task-notice">
-                  Creating child task for: <strong>{task.name}</strong>
+                  {t('taskDetails.creatingChildTaskFor', { taskName: task.name })}
                 </div>
               )}
               <div className="task-detail-item">
-                <label className="task-detail-label" htmlFor="edit-task-name">Name *</label>
+                <label className="task-detail-label" htmlFor="edit-task-name">{t('taskDetails.name')} *</label>
                 <input
                   type="text"
                   id="edit-task-name"
@@ -494,11 +496,11 @@ function TaskDetailsDialog({ isOpen, task, onClose, onUpdate, onDelete, onCreate
                   value={editedTask.name}
                   onChange={(e) => setEditedTask({ ...editedTask, name: e.target.value })}
                   required
-                  placeholder={isCreateMode ? "Enter task name" : ""}
+                  placeholder={isCreateMode ? t('taskDetails.namePlaceholder') : ""}
                 />
               </div>
               <div className="task-detail-item">
-                <label className="task-detail-label" htmlFor="edit-task-status">Status</label>
+                <label className="task-detail-label" htmlFor="edit-task-status">{t('taskDetails.status')}</label>
                 <select
                   id="edit-task-status"
                   className="task-input"
@@ -512,13 +514,13 @@ function TaskDetailsDialog({ isOpen, task, onClose, onUpdate, onDelete, onCreate
                     });
                   }}
                 >
-                  <option value="TODO">Not Started</option>
-                  <option value="IN_PROGRESS">In Progress</option>
-                  <option value="DONE">Completed</option>
+                  <option value="TODO">{t('taskDetails.notStarted')}</option>
+                  <option value="IN_PROGRESS">{t('taskDetails.inProgress')}</option>
+                  <option value="DONE">{t('taskDetails.completed')}</option>
                 </select>
               </div>
               <div className="task-detail-item">
-                <label className="task-detail-label" htmlFor="edit-task-progress">Progress (%)</label>
+                <label className="task-detail-label" htmlFor="edit-task-progress">{t('taskDetails.progress')}</label>
                 <input
                   type="number"
                   id="edit-task-progress"
@@ -527,11 +529,11 @@ function TaskDetailsDialog({ isOpen, task, onClose, onUpdate, onDelete, onCreate
                   onChange={(e) => setEditedTask({ ...editedTask, progress: e.target.value })}
                   min="0"
                   max="100"
-                  placeholder={isCreateMode ? "0" : ""}
+                  placeholder={isCreateMode ? t('taskDetails.progressPlaceholder') : ""}
                 />
               </div>
               <div className="task-detail-item">
-                <label className="task-detail-label" htmlFor="edit-task-planned-start">Planned Start Date</label>
+                <label className="task-detail-label" htmlFor="edit-task-planned-start">{t('taskDetails.plannedStartDate')}</label>
                 <input
                   type="date"
                   id="edit-task-planned-start"
@@ -541,7 +543,7 @@ function TaskDetailsDialog({ isOpen, task, onClose, onUpdate, onDelete, onCreate
                 />
               </div>
               <div className="task-detail-item">
-                <label className="task-detail-label" htmlFor="edit-task-planned-end">Planned End Date</label>
+                <label className="task-detail-label" htmlFor="edit-task-planned-end">{t('taskDetails.plannedEndDate')}</label>
                 <input
                   type="date"
                   id="edit-task-planned-end"
@@ -551,7 +553,7 @@ function TaskDetailsDialog({ isOpen, task, onClose, onUpdate, onDelete, onCreate
                 />
               </div>
               <div className="task-detail-item">
-                <label className="task-detail-label" htmlFor="edit-task-actual-start">Actual Start Date</label>
+                <label className="task-detail-label" htmlFor="edit-task-actual-start">{t('taskDetails.actualStartDate')}</label>
                 <input
                   type="date"
                   id="edit-task-actual-start"
@@ -561,7 +563,7 @@ function TaskDetailsDialog({ isOpen, task, onClose, onUpdate, onDelete, onCreate
                 />
               </div>
               <div className="task-detail-item">
-                <label className="task-detail-label" htmlFor="edit-task-actual-end">Actual End Date</label>
+                <label className="task-detail-label" htmlFor="edit-task-actual-end">{t('taskDetails.actualEndDate')}</label>
                 <input
                   type="date"
                   id="edit-task-actual-end"
@@ -583,55 +585,55 @@ function TaskDetailsDialog({ isOpen, task, onClose, onUpdate, onDelete, onCreate
             <div className="dialog-body">
               {viewingChildTask && (
                 <button className="task-back-button" onClick={handleBackToParent}>
-                  ← Back to Parent Task
+                  {t('taskDetails.backToParent')}
                 </button>
               )}
               {isTaskDelayed(getCurrentTask()) && (
                 <div className="delayed-label">
-                  ⚠️ Task is Delayed
+                  {t('taskDetails.taskDelayed')}
                 </div>
               )}
               <div className="task-detail-item">
-                <span className="task-detail-label">Name:</span>
+                <span className="task-detail-label">{t('taskDetails.name')}:</span>
                 <span className="task-detail-value">{getCurrentTask().name}</span>
               </div>
               <div className="task-detail-item">
-                <span className="task-detail-label">Progress:</span>
+                <span className="task-detail-label">{t('taskDetails.progress')}:</span>
                 {renderPieChart(getCurrentTask().progress || 0)}
               </div>
               <div className="task-detail-item">
-                <span className="task-detail-label">Status:</span>
+                <span className="task-detail-label">{t('taskDetails.status')}:</span>
                 <span className={`status-badge status-${getCurrentTask().status?.toLowerCase().replace(/\s+/g, '-')}`}>
                   {getCurrentTask().status}
                 </span>
               </div>
               <div className="task-detail-item">
-                <span className="task-detail-label">Planned Start Date:</span>
+                <span className="task-detail-label">{t('taskDetails.plannedStartDate')}:</span>
                 <span className="task-detail-value">
-                  {getCurrentTask().planned_start_date ? formatDate(getCurrentTask().planned_start_date) : 'N/A'}
+                  {getCurrentTask().planned_start_date ? formatDate(getCurrentTask().planned_start_date) : t('common.noData')}
                 </span>
               </div>
               <div className="task-detail-item">
-                <span className="task-detail-label">Planned End Date:</span>
+                <span className="task-detail-label">{t('taskDetails.plannedEndDate')}:</span>
                 <span className="task-detail-value">
-                  {getCurrentTask().planned_end_date ? formatDate(getCurrentTask().planned_end_date) : 'N/A'}
+                  {getCurrentTask().planned_end_date ? formatDate(getCurrentTask().planned_end_date) : t('common.noData')}
                 </span>
               </div>
               <div className="task-detail-item">
-                <span className="task-detail-label">Actual Start Date:</span>
+                <span className="task-detail-label">{t('taskDetails.actualStartDate')}:</span>
                 <span className="task-detail-value">
-                  {getCurrentTask().actual_start_date ? formatDate(getCurrentTask().actual_start_date) : 'N/A'}
+                  {getCurrentTask().actual_start_date ? formatDate(getCurrentTask().actual_start_date) : t('common.noData')}
                 </span>
               </div>
               <div className="task-detail-item">
-                <span className="task-detail-label">Actual End Date:</span>
+                <span className="task-detail-label">{t('taskDetails.actualEndDate')}:</span>
                 <span className="task-detail-value">
-                  {getCurrentTask().actual_end_date ? formatDate(getCurrentTask().actual_end_date) : 'N/A'}
+                  {getCurrentTask().actual_end_date ? formatDate(getCurrentTask().actual_end_date) : t('common.noData')}
                 </span>
               </div>
               {getCurrentTask().expenses_values && getCurrentTask().expenses_values !== 0 && (
                 <div className="task-detail-item">
-                  <span className="task-detail-label">Cost:</span>
+                  <span className="task-detail-label">{t('taskDetails.cost')}</span>
                   <span className="task-detail-value">
                     {typeof getCurrentTask().expenses_values === 'number' 
                       ? `$${getCurrentTask().expenses_values.toFixed(2)}`
@@ -642,21 +644,21 @@ function TaskDetailsDialog({ isOpen, task, onClose, onUpdate, onDelete, onCreate
               {!viewingChildTask && hasChildren(task) && (
                 <div className="task-detail-item task-children-section">
                   <div className="task-children-header">
-                    <span className="task-detail-label">Children Tasks:</span>
+                    <span className="task-detail-label">{t('taskDetails.childrenTasks')}</span>
                     <button 
                       className="create-child-task-button"
                       onClick={handleCreateChildTask}
                     >
-                      + Create Child Task
+                      {t('taskDetails.createChildTaskButton')}
                     </button>
                   </div>
                   <div className="task-children-table-container">
                     <table className="task-children-table">
                       <thead>
                         <tr>
-                          <th>Task Name</th>
-                          <th>Progress</th>
-                          <th>Details</th>
+                          <th>{t('taskDetails.taskName')}</th>
+                          <th>{t('taskDetails.progress')}</th>
+                          <th>{t('common.details')}</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -682,7 +684,7 @@ function TaskDetailsDialog({ isOpen, task, onClose, onUpdate, onDelete, onCreate
                                 className="child-task-details-button" 
                                 onClick={() => handleViewChildTask(childTask)}
                               >
-                                Details
+                                {t('common.details')}
                               </button>
                             </td>
                           </tr>
@@ -695,16 +697,16 @@ function TaskDetailsDialog({ isOpen, task, onClose, onUpdate, onDelete, onCreate
               {!viewingChildTask && !hasChildren(task) && (
                 <div className="task-detail-item task-children-section">
                   <div className="task-children-header">
-                    <span className="task-detail-label">Children Tasks:</span>
+                    <span className="task-detail-label">{t('taskDetails.childrenTasks')}</span>
                     <button 
                       className="create-child-task-button"
                       onClick={handleCreateChildTask}
                     >
-                      + Create Child Task
+                      {t('taskDetails.createChildTaskButton')}
                     </button>
                   </div>
                   <div className="no-children-message">
-                    No child tasks yet. Create one to get started.
+                    {t('taskDetails.noChildTasks')}
                   </div>
                 </div>
               )}
@@ -713,21 +715,21 @@ function TaskDetailsDialog({ isOpen, task, onClose, onUpdate, onDelete, onCreate
                   className="create-expense-button"
                   onClick={handleCreateExpense}
                 >
-                  + Register New Expense
+                  {t('taskDetails.registerNewExpense')}
                 </button>
               </div>
               {!viewingChildTask && (
                 <div className="task-detail-item task-expenses-section">
                   <div className="task-children-header">
-                    <span className="task-detail-label">Expenses:</span>
+                    <span className="task-detail-label">{t('taskDetails.expenses')}</span>
                   </div>
                   {loadingExpenses ? (
                     <div className="no-children-message">
-                      Loading expenses...
+                      {t('taskDetails.loadingExpenses')}
                     </div>
                   ) : expenses.length === 0 ? (
                     <div className="no-children-message">
-                      No expenses registered for this task yet.
+                      {t('taskDetails.noExpenses')}
                     </div>
                   ) : (
                     <div className="task-expenses-table-container">
@@ -743,7 +745,7 @@ function TaskDetailsDialog({ isOpen, task, onClose, onUpdate, onDelete, onCreate
               )}
               {!isCreateMode && (
                 <div className="task-detail-item">
-                  <span className="task-detail-label">ID:</span>
+                  <span className="task-detail-label">{t('taskDetails.id')}</span>
                   <span className="task-detail-value task-id-value">{getCurrentTask().id}</span>
                 </div>
               )}

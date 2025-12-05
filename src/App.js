@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import Login from './Login';
 import Projects from './Projects';
 import ProjectScreen from './ProjectScreen';
@@ -10,15 +11,33 @@ import TasksScreen from './TasksScreen';
 import './App.css';
 
 function UserMenu() {
+  const { t, i18n: i18nInstance } = useTranslation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [currentLanguage, setCurrentLanguage] = useState(i18nInstance.language || 'en');
   const location = useLocation();
   const hasToken = !!localStorage.getItem('access_token');
+
+  useEffect(() => {
+    // Load saved language preference
+    const savedLanguage = localStorage.getItem('preferredLanguage');
+    if (savedLanguage && (savedLanguage === 'en' || savedLanguage === 'pt-BR')) {
+      i18nInstance.changeLanguage(savedLanguage);
+      setCurrentLanguage(savedLanguage);
+    }
+  }, [i18nInstance]);
 
   const handleLogout = () => {
     localStorage.removeItem('access_token');
     localStorage.removeItem('selectedProject');
     setIsMenuOpen(false);
     window.location.href = '/login';
+  };
+
+  const handleLanguageChange = (lang) => {
+    i18nInstance.changeLanguage(lang);
+    setCurrentLanguage(lang);
+    localStorage.setItem('preferredLanguage', lang);
+    setIsMenuOpen(false);
   };
 
   useEffect(() => {
@@ -52,8 +71,24 @@ function UserMenu() {
       </button>
       {isMenuOpen && (
         <div className="user-menu-dropdown">
+          <div className="user-menu-section">
+            <div className="user-menu-section-label">{t('common.language')}</div>
+            <button 
+              className={`user-menu-item language-item ${currentLanguage === 'en' ? 'active' : ''}`}
+              onClick={() => handleLanguageChange('en')}
+            >
+              English
+            </button>
+            <button 
+              className={`user-menu-item language-item ${currentLanguage === 'pt-BR' ? 'active' : ''}`}
+              onClick={() => handleLanguageChange('pt-BR')}
+            >
+              Português
+            </button>
+          </div>
+          <div className="user-menu-divider"></div>
           <button className="user-menu-item" onClick={handleLogout}>
-            Logout
+            {t('common.logout')}
           </button>
         </div>
       )}
@@ -62,6 +97,7 @@ function UserMenu() {
 }
 
 function RootRedirect() {
+  const { t } = useTranslation();
   const hasAccessToken = !!localStorage.getItem('access_token');
   
   const getSelectedProjectId = () => {
@@ -69,7 +105,7 @@ function RootRedirect() {
       const selectedProject = localStorage.getItem('selectedProject');
       return selectedProject;
     } catch (err) {
-      console.error('Error parsing selectedProject:', err);
+      console.error(t('errors.errorParsing', { error: err.message }));
       localStorage.removeItem('selectedProject');
     }
     return null;

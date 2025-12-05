@@ -1,5 +1,6 @@
 import React, { useCallback } from 'react';
 import { useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { checkAuthError } from './apiUtils';
 import { API_BASE_URL } from './config';
 import TaskDetailsDialog from './TaskDetailsDialog';
@@ -8,6 +9,7 @@ import EntitiesScreen from './EntitiesScreen';
 import './TasksScreen.css';
 
 function TasksScreen() {
+  const { t } = useTranslation();
   const { projectId } = useParams();
 
   const fetchTasks = useCallback(async (projectId) => {
@@ -127,12 +129,12 @@ function TasksScreen() {
     const todo = flattened.filter(task => task.status === 'TODO' || task.status === 'NOT_STARTED').length;
     
     return [
-      { label: 'Total Tasks', value: total },
-      { label: 'Completed', value: completed, className: 'tasks-summary-completed' },
-      { label: 'In Progress', value: inProgress, className: 'tasks-summary-in-progress' },
-      { label: 'To Do', value: todo, className: 'tasks-summary-todo' },
+      { label: t('tasks.totalTasks'), value: total },
+      { label: t('tasks.completed'), value: completed, className: 'tasks-summary-completed' },
+      { label: t('tasks.inProgress'), value: inProgress, className: 'tasks-summary-in-progress' },
+      { label: t('tasks.toDo'), value: todo, className: 'tasks-summary-todo' },
     ];
-  }, [flattenTasksForSummary]);
+  }, [flattenTasksForSummary, t]);
 
   // This will be called by EntitiesScreen with the current entities
   const getSummaryConfig = (entities) => {
@@ -142,14 +144,14 @@ function TasksScreen() {
   const filterConfig = [
     {
       type: 'multiselect',
-      label: 'Status',
+      label: t('tasks.status'),
       stateKey: 'selectedStatuses',
       options: ['TODO', 'IN_PROGRESS', 'DONE'],
-      placeholder: 'Select statuses...',
+      placeholder: t('tasks.selectStatuses'),
     },
     {
       type: 'date-range',
-      label: 'Date Interval (Planned Dates)',
+      label: t('tasks.dateInterval'),
       stateKey: 'dateInterval',
       fullWidth: true,
     },
@@ -157,17 +159,17 @@ function TasksScreen() {
 
   return (
     <EntitiesScreen
-      title="Tasks"
+      title={t('tasks.title')}
       entityName="tasks"
       backPath={`/projects/${projectId}/dashboard`}
       fetchEntities={fetchTasks}
       filterConfig={filterConfig}
       summaryConfig={getSummaryConfig}
-      createButtonText="+ Create Task"
+      createButtonText={t('tasks.createTask')}
       detailsDialog={TaskDetailsDialog}
-      emptyMessage="No tasks found. Create your first task to get started."
-      noFilterMatchMessage="No tasks match the current filters."
-      loadingMessage="Loading tasks..."
+      emptyMessage={t('tasks.noTasks')}
+      noFilterMatchMessage={t('tasks.noFilterMatch')}
+      loadingMessage={t('tasks.loadingTasks')}
       filterEntities={filterEntities}
       tableComponent={TasksTable}
     />

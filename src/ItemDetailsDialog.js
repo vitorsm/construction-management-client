@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { checkAuthError } from './apiUtils';
 import { API_BASE_URL } from './config';
 import Dialog from './Dialog';
 import './ItemDetailsDialog.css';
 
 function ItemDetailsDialog({ isOpen, item, onClose, onUpdate, onDelete, onCreate }) {
+  const { t } = useTranslation();
   const [isEditMode, setIsEditMode] = useState(false);
   const [editedItem, setEditedItem] = useState(null);
   const isCreateMode = !item;
@@ -82,7 +84,7 @@ function ItemDetailsDialog({ isOpen, item, onClose, onUpdate, onDelete, onCreate
       }
     } catch (err) {
       console.error('Error creating item:', err);
-      alert(err.message || 'An error occurred while creating the item');
+      alert(err.message || t('items.errorCreating'));
     }
   };
 
@@ -133,14 +135,14 @@ function ItemDetailsDialog({ isOpen, item, onClose, onUpdate, onDelete, onCreate
       }
     } catch (err) {
       console.error('Error updating item:', err);
-      alert(err.message || 'An error occurred while updating the item');
+      alert(err.message || t('items.errorUpdating'));
     }
   };
 
   const handleDeleteItem = async () => {
     if (!item) return;
     
-    const confirmed = window.confirm(`Are you sure you want to delete the item "${item.name}"? This action cannot be undone.`);
+    const confirmed = window.confirm(t('items.deleteConfirm', { itemName: item.name }));
     
     if (!confirmed) return;
 
@@ -177,11 +179,11 @@ function ItemDetailsDialog({ isOpen, item, onClose, onUpdate, onDelete, onCreate
       }
     } catch (err) {
       console.error('Error deleting item:', err);
-      alert(err.message || 'An error occurred while deleting the item');
+      alert(err.message || t('items.errorDeleting'));
     }
   };
 
-  const dialogTitle = isCreateMode ? 'Create Item' : isEditMode ? 'Edit Item' : 'Item Details';
+  const dialogTitle = isCreateMode ? t('items.createItem') : isEditMode ? t('items.editItem') : t('items.itemDetails');
 
   // Build footer buttons for edit/create mode
   const editModeFooterButtons = isEditMode && editedItem ? [
@@ -193,7 +195,7 @@ function ItemDetailsDialog({ isOpen, item, onClose, onUpdate, onDelete, onCreate
     },
     { 
       type: 'save', 
-      label: isCreateMode ? 'Create Item' : 'Save',
+      label: isCreateMode ? t('items.createItem') : t('common.save'),
       formSubmit: true,
       formId: 'item-form',
       onClick: undefined,
@@ -221,12 +223,12 @@ function ItemDetailsDialog({ isOpen, item, onClose, onUpdate, onDelete, onCreate
             <div className="dialog-body">
               {!isCreateMode && (
                 <div className="task-detail-item">
-                  <span className="task-detail-label">ID:</span>
+                  <span className="task-detail-label">{t('items.id')}</span>
                   <span className="task-detail-value task-id-value">{item.id}</span>
                 </div>
               )}
               <div className="task-detail-item">
-                <label className="task-detail-label" htmlFor="edit-item-name">Name *</label>
+                <label className="task-detail-label" htmlFor="edit-item-name">{t('items.name')} *</label>
                 <input
                   type="text"
                   id="edit-item-name"
@@ -234,18 +236,18 @@ function ItemDetailsDialog({ isOpen, item, onClose, onUpdate, onDelete, onCreate
                   value={editedItem.name}
                   onChange={(e) => setEditedItem({ ...editedItem, name: e.target.value })}
                   required
-                  placeholder={isCreateMode ? "Enter item name" : ""}
+                  placeholder={isCreateMode ? t('items.namePlaceholder') : ""}
                 />
               </div>
               <div className="task-detail-item">
-                <label className="task-detail-label" htmlFor="edit-item-unit">Unit of Measurement</label>
+                <label className="task-detail-label" htmlFor="edit-item-unit">{t('items.unitOfMeasurement')}</label>
                 <input
                   type="text"
                   id="edit-item-unit"
                   className="task-input"
                   value={editedItem.unit_of_measurement}
                   onChange={(e) => setEditedItem({ ...editedItem, unit_of_measurement: e.target.value })}
-                  placeholder={isCreateMode ? "e.g., kg, m, pcs" : ""}
+                  placeholder={isCreateMode ? t('items.unitPlaceholder') : ""}
                 />
               </div>
             </div>
@@ -254,16 +256,16 @@ function ItemDetailsDialog({ isOpen, item, onClose, onUpdate, onDelete, onCreate
           <>
             <div className="dialog-body">
               <div className="task-detail-item">
-                <span className="task-detail-label">ID:</span>
+                <span className="task-detail-label">{t('items.id') || 'ID:'}</span>
                 <span className="task-detail-value task-id-value">{item.id}</span>
               </div>
               <div className="task-detail-item">
-                <span className="task-detail-label">Name:</span>
+                <span className="task-detail-label">{t('items.name')}:</span>
                 <span className="task-detail-value">{item.name}</span>
               </div>
               <div className="task-detail-item">
-                <span className="task-detail-label">Unit of Measurement:</span>
-                <span className="task-detail-value">{item.unit_of_measurement || 'N/A'}</span>
+                <span className="task-detail-label">{t('items.unitOfMeasurement')}:</span>
+                <span className="task-detail-value">{item.unit_of_measurement || t('common.noData')}</span>
               </div>
             </div>
           </>

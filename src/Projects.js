@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { checkAuthError } from './apiUtils';
 import { API_BASE_URL } from './config';
 import './Projects.css';
 
 function Projects() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -30,7 +32,7 @@ function Projects() {
       const token = localStorage.getItem('access_token');
       
       if (!token) {
-        throw new Error('No access token found. Please login again.');
+        throw new Error(t('errors.noAccessToken'));
       }
 
       const response = await fetch(`${API_BASE_URL}/api/projects/workspace/f0ae47da-7352-455c-a3ad-02e7fb8d29c9`, {
@@ -45,13 +47,13 @@ function Projects() {
         if (checkAuthError(response)) {
           return;
         }
-        throw new Error(`Failed to fetch projects: ${response.status} ${response.statusText}`);
+        throw new Error(t('errors.failedToFetch', { resource: 'projects', status: response.status, statusText: response.statusText }));
       }
 
       const data = await response.json();
       setProjects(data);
     } catch (err) {
-      setError(err.message || 'An error occurred while fetching projects');
+      setError(err.message || t('projects.errorFetching'));
       console.error('Error fetching projects:', err);
     } finally {
       setLoading(false);
@@ -85,7 +87,7 @@ function Projects() {
       const token = localStorage.getItem('access_token');
       
       if (!token) {
-        throw new Error('No access token found. Please login again.');
+        throw new Error(t('errors.noAccessToken'));
       }
 
       const projectData = {
@@ -107,7 +109,7 @@ function Projects() {
         if (checkAuthError(response)) {
           return;
         }
-        throw new Error(`Failed to create project: ${response.status} ${response.statusText}`);
+        throw new Error(t('errors.failedToCreate', { resource: 'project', status: response.status, statusText: response.statusText }));
       }
 
       // Refresh projects list and close dialog
@@ -115,7 +117,7 @@ function Projects() {
       await fetchProjects();
     } catch (err) {
       console.error('Error creating project:', err);
-      alert(err.message || 'An error occurred while creating the project');
+      alert(err.message || t('projects.errorCreating'));
     }
   };
 
@@ -144,7 +146,7 @@ function Projects() {
   if (loading) {
     return (
       <div className="projects-container">
-        <div className="loading-message">Loading projects...</div>
+        <div className="loading-message">{t('projects.loadingProjects')}</div>
       </div>
     );
   }
@@ -160,13 +162,13 @@ function Projects() {
   return (
     <div className="projects-container">
       <div className="projects-header">
-        <h1>Projects</h1>
-        <p className="projects-count">{projects.length} project{projects.length !== 1 ? 's' : ''}</p>
+        <h1>{t('projects.title')}</h1>
+        <p className="projects-count">{t('projects.projectCount', { count: projects.length, plural: projects.length !== 1 ? 's' : '' })}</p>
       </div>
       
       {projects.length === 0 ? (
         <div className="no-projects">
-          <p>No projects found.</p>
+          <p>{t('projects.noProjects')}</p>
         </div>
       ) : (
         <div className="projects-grid">
@@ -181,11 +183,11 @@ function Projects() {
               </div>
               <div className="project-card-body">
                 <div className="project-info">
-                  <span className="project-label">ID:</span>
+                  <span className="project-label">{t('projects.projectId')}</span>
                   <span className="project-value project-id">{project.id}</span>
                 </div>
                 <div className="project-info">
-                  <span className="project-label">Budget:</span>
+                  <span className="project-label">{t('projects.projectBudget')}</span>
                   <span className="project-value project-budget">{formatBudget(project.budget)}</span>
                 </div>
               </div>
@@ -203,13 +205,13 @@ function Projects() {
         <div className="dialog-overlay" onClick={handleCloseCreateProjectDialog}>
           <div className="dialog-content" onClick={(e) => e.stopPropagation()}>
             <div className="dialog-header">
-              <h2>Create Project</h2>
+              <h2>{t('projects.createProject')}</h2>
               <button className="dialog-close-button" onClick={handleCloseCreateProjectDialog}>×</button>
             </div>
             <form onSubmit={handleCreateProject}>
               <div className="dialog-body">
                 <div className="task-detail-item">
-                  <label className="task-detail-label" htmlFor="project-name">Name *</label>
+                  <label className="task-detail-label" htmlFor="project-name">{t('projects.projectName')} *</label>
                   <input
                     type="text"
                     id="project-name"
@@ -217,11 +219,11 @@ function Projects() {
                     value={newProject.name}
                     onChange={(e) => setNewProject({ ...newProject, name: e.target.value })}
                     required
-                    placeholder="Enter project name"
+                    placeholder={t('projects.projectNamePlaceholder')}
                   />
                 </div>
                 <div className="task-detail-item">
-                  <label className="task-detail-label" htmlFor="project-budget">Budget *</label>
+                  <label className="task-detail-label" htmlFor="project-budget">{t('projects.projectBudget')} *</label>
                   <input
                     type="number"
                     id="project-budget"
@@ -231,16 +233,16 @@ function Projects() {
                     required
                     min="0"
                     step="0.01"
-                    placeholder="0.00"
+                    placeholder={t('projects.projectBudgetPlaceholder')}
                   />
                 </div>
               </div>
               <div className="dialog-footer">
                 <button type="button" className="dialog-cancel-btn" onClick={handleCloseCreateProjectDialog}>
-                  Cancel
+                  {t('common.cancel')}
                 </button>
                 <button type="submit" className="dialog-close-btn">
-                  Create Project
+                  {t('projects.createProjectButton')}
                 </button>
               </div>
             </form>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { checkAuthError } from './apiUtils';
 import { API_BASE_URL } from './config';
 import DailyReport from './DailyReport';
@@ -9,6 +10,7 @@ import GenericScreen from './GenericScreen';
 import './ProjectScreen.css';
 
 function ProjectScreen() {
+  const { t } = useTranslation();
   const { projectId } = useParams();
   const navigate = useNavigate();
   const [project, setProject] = useState(null);
@@ -150,7 +152,7 @@ function ProjectScreen() {
   return (
     <>
       <GenericScreen
-        title={project?.name || 'Project Screen'}
+        title={project?.name || t('projectScreen.title')}
         backPath="/projects"
       >
                 
@@ -159,35 +161,35 @@ function ProjectScreen() {
             className="project-screen-button"
             onClick={handleOpenCreateExpenseDialog}
           >
-            Create Expense
+            {t('projectScreen.createExpense')}
           </button>
           
           <button 
             className="project-screen-button"
             onClick={handleOpenDailyReportDialog}
           >
-            Daily Report
+            {t('projectScreen.dailyReport')}
           </button>
           
           <button 
             className="project-screen-button"
             onClick={handleOpenCreateTaskDialog}
           >
-            Create Task
+            {t('projectScreen.createTask')}
           </button>
           
           <button 
             className="project-screen-button"
             onClick={() => navigate(`/projects/${projectId}/feed`)}
           >
-            Feed
+            {t('projectScreen.feed')}
           </button>
           
           <button 
             className="project-screen-button"
             onClick={() => navigate(`/projects/${projectId}/dashboard`)}
           >
-            Dashboard
+            {t('projectScreen.dashboard')}
           </button>
         </div>
       </GenericScreen>

@@ -1,10 +1,12 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import EntityTable from './EntityTable';
 import './ExpensesTable.css';
 
 function ExpensesTable({ entities, onRowClick, getRowKey, columnsToShow }) {
+  const { t } = useTranslation();
   const formatCurrency = (value) => {
-    if (!value && value !== 0) return 'N/A';
+    if (!value && value !== 0) return t('common.noData');
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
@@ -14,7 +16,7 @@ function ExpensesTable({ entities, onRowClick, getRowKey, columnsToShow }) {
   };
 
   const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
+    if (!dateString) return t('common.noData');
     const date = new Date(dateString);
     return new Intl.DateTimeFormat('en-US', {
       year: 'numeric',
@@ -25,7 +27,7 @@ function ExpensesTable({ entities, onRowClick, getRowKey, columnsToShow }) {
 
   const allColumns = {
     name: {
-      header: 'Name',
+      header: t('expensesTable.name'),
       attribute: 'name',
       cellClassName: 'expense-name mobile-clickable',
       render: (expense, value) => (
@@ -33,7 +35,7 @@ function ExpensesTable({ entities, onRowClick, getRowKey, columnsToShow }) {
       ),
     },
     type: {
-      header: 'Type',
+      header: t('expensesTable.type'),
       attribute: 'expense_type',
       hideMobile: true,
       render: (expense, value) => (
@@ -44,7 +46,7 @@ function ExpensesTable({ entities, onRowClick, getRowKey, columnsToShow }) {
       clickable: false,
     },
     class: {
-      header: 'Class',
+      header: t('expensesTable.class'),
       attribute: 'expense_class',
       hideMobile: true,
       render: (expense, value) => (
@@ -55,7 +57,7 @@ function ExpensesTable({ entities, onRowClick, getRowKey, columnsToShow }) {
       clickable: false,
     },
     value: {
-      header: 'Value',
+      header: t('expensesTable.value'),
       attribute: 'value',
       cellClassName: 'expense-value-cell',
       format: formatCurrency,
@@ -65,7 +67,7 @@ function ExpensesTable({ entities, onRowClick, getRowKey, columnsToShow }) {
       clickable: false,
     },
     created_at: {
-      header: 'Created At',
+      header: t('expensesTable.createdAt'),
       attribute: 'created_at',
       hideMobile: true,
       cellClassName: 'expense-date-cell',
@@ -76,7 +78,7 @@ function ExpensesTable({ entities, onRowClick, getRowKey, columnsToShow }) {
       clickable: false,
     },
     details: {
-      header: 'Details',
+      header: t('expensesTable.details'),
       hideMobile: true,
       render: (expense, value, onRowClick) => (
         <button 
@@ -88,7 +90,7 @@ function ExpensesTable({ entities, onRowClick, getRowKey, columnsToShow }) {
             }
           }}
         >
-          Details
+          {t('expensesTable.details')}
         </button>
       ),
       clickable: false,

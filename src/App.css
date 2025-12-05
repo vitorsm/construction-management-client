@@ -116,6 +116,40 @@
   background-color: #e9ecef;
 }
 
+.user-menu-section {
+  padding: 8px 0;
+}
+
+.user-menu-section-label {
+  padding: 8px 20px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.user-menu-divider {
+  height: 1px;
+  background-color: #e9ecef;
+  margin: 4px 0;
+}
+
+.language-item {
+  padding: 10px 20px;
+  font-size: 14px;
+}
+
+.language-item.active {
+  background-color: #667eea;
+  color: white;
+  font-weight: 600;
+}
+
+.language-item.active:hover {
+  background-color: #5568d3;
+}
+
 @media (max-width: 768px) {
   .user-menu-container {
     top: 15px;

@@ -1,14 +1,16 @@
 import React, { useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import EntityTable from './EntityTable';
 import './TasksTable.css';
 
 function TasksTable({ entities, onRowClick, getRowKey, columnsFilter }) {
+  const { t } = useTranslation();
   // Tree expansion state
   const [expandedTasks, setExpandedTasks] = useState(new Set());
   console.log('TasksTable.entities', entities)
 
   const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
+    if (!dateString) return t('common.noData');
     const date = new Date(dateString);
     return new Intl.DateTimeFormat('en-US', {
       year: 'numeric',
@@ -18,7 +20,7 @@ function TasksTable({ entities, onRowClick, getRowKey, columnsFilter }) {
   };
 
   const formatCurrency = (value) => {
-    if (!value && value !== 0) return 'N/A';
+    if (!value && value !== 0) return t('common.noData');
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
@@ -109,7 +111,7 @@ function TasksTable({ entities, onRowClick, getRowKey, columnsFilter }) {
 
   const columns = [
     {
-      header: 'Name',
+      header: t('tasksTable.name'),
       attribute: 'name',
       cellClassName: 'task-name-cell',
       render: (task, value, onRowClick) => {
@@ -132,7 +134,7 @@ function TasksTable({ entities, onRowClick, getRowKey, columnsFilter }) {
                     e.stopPropagation();
                     toggleTaskExpansion(task.id, e);
                   }}
-                  aria-label={expanded ? 'Collapse' : 'Expand'}
+                  aria-label={expanded ? t('tasksTable.collapse') : t('tasksTable.expand')}
                 >
                   {expanded ? '▼' : '▶'}
                 </button>
@@ -140,7 +142,7 @@ function TasksTable({ entities, onRowClick, getRowKey, columnsFilter }) {
               {!hasChildTasks && <span className="task-expand-spacer" />}
               <span className="task-name-text">{task.name}</span>
               {isTaskDelayed(task) && (
-                <span className="task-delayed-badge" title="Task is delayed">⚠️</span>
+                <span className="task-delayed-badge" title={t('tasksTable.taskIsDelayed')}>⚠️</span>
               )}
             </div>
           </div>
@@ -148,7 +150,7 @@ function TasksTable({ entities, onRowClick, getRowKey, columnsFilter }) {
       },
     },
     {
-      header: 'Status',
+      header: t('tasksTable.status'),
       attribute: 'status',
       hideMobile: true,
       render: (task, value) => (
@@ -158,7 +160,7 @@ function TasksTable({ entities, onRowClick, getRowKey, columnsFilter }) {
       ),
     },
     {
-      header: 'Progress',
+      header: t('tasksTable.progress'),
       attribute: 'progress',
       cellClassName: 'task-progress-cell',
       render: (task, value) => {
@@ -180,7 +182,7 @@ function TasksTable({ entities, onRowClick, getRowKey, columnsFilter }) {
       },
     },
     {
-      header: 'Cost',
+      header: t('tasksTable.cost'),
       attribute: 'actual_expenses_values',
       hideMobile: true,
       cellClassName: 'task-cost-cell',
@@ -193,7 +195,7 @@ function TasksTable({ entities, onRowClick, getRowKey, columnsFilter }) {
       clickable: false,
     },
     {
-      header: 'Planned Cost',
+      header: t('tasksTable.plannedCost'),
       attribute: 'planned_expenses_values',
       hideMobile: true,
       cellClassName: 'task-cost-cell',
@@ -206,21 +208,21 @@ function TasksTable({ entities, onRowClick, getRowKey, columnsFilter }) {
       clickable: false,
     },
     {
-      header: 'Start Date',
+      header: t('tasksTable.startDate'),
       attribute: 'start_date',
       hideMobile: true,
       cellClassName: 'task-date-cell',
       format: (value) => formatDate(value),
     },
     {
-      header: 'End Date',
+      header: t('tasksTable.endDate'),
       attribute: 'end_date',
       hideMobile: true,
       cellClassName: 'task-date-cell',
       format: (value) => formatDate(value),
     },
     {
-      header: 'Details',
+      header: t('tasksTable.details'),
       hideMobile: true,
       render: (task, value, onRowClick) => (
         <button 
@@ -230,7 +232,7 @@ function TasksTable({ entities, onRowClick, getRowKey, columnsFilter }) {
             onRowClick && onRowClick(task);
           }}
         >
-          Details
+          {t('tasksTable.details')}
         </button>
       ),
       clickable: false,

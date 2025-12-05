@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { API_BASE_URL } from './config';
 import './Login.css';
 
 function Login() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -28,7 +30,7 @@ function Login() {
       });
 
       if (!response.ok) {
-        throw new Error(`Authentication failed: ${response.status} ${response.statusText}`);
+        throw new Error(t('errors.authenticationFailed', { status: response.status, statusText: response.statusText }));
       }
 
       const data = await response.json();
@@ -42,10 +44,10 @@ function Login() {
         navigate('/projects');
       } else {
         console.warn('No access_token found in response');
-        setError('No access token received from server');
+        setError(t('login.noTokenError'));
       }
     } catch (err) {
-      setError(err.message || 'An error occurred during authentication');
+      setError(err.message || t('login.error'));
       console.error('Authentication error:', err);
     } finally {
       setLoading(false);
@@ -55,10 +57,10 @@ function Login() {
   return (
     <div className="login-container">
       <div className="login-box">
-        <h2>Login</h2>
+        <h2>{t('login.title')}</h2>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="username">Username</label>
+            <label htmlFor="username">{t('login.username')}</label>
             <input
               type="text"
               id="username"
@@ -66,11 +68,11 @@ function Login() {
               onChange={(e) => setUsername(e.target.value)}
               required
               disabled={loading}
-              placeholder="Enter your username"
+              placeholder={t('login.usernamePlaceholder')}
             />
           </div>
           <div className="form-group">
-            <label htmlFor="password">Password</label>
+            <label htmlFor="password">{t('login.password')}</label>
             <input
               type="password"
               id="password"
@@ -78,12 +80,12 @@ function Login() {
               onChange={(e) => setPassword(e.target.value)}
               required
               disabled={loading}
-              placeholder="Enter your password"
+              placeholder={t('login.passwordPlaceholder')}
             />
           </div>
           {error && <div className="error-message">{error}</div>}
           <button type="submit" disabled={loading} className="login-button">
-            {loading ? 'Logging in...' : 'Login'}
+            {loading ? t('login.loggingIn') : t('login.loginButton')}
           </button>
         </form>
       </div>

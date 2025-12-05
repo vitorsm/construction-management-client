@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { checkAuthError } from './apiUtils';
 import { API_BASE_URL } from './config';
 import TaskDetailsDialog from './TaskDetailsDialog';
@@ -11,6 +12,7 @@ import TasksTable from './TasksTable';
 import './ProjectDetail.css';
 
 function ProjectDetail() {
+  const { t } = useTranslation();
   const { projectId } = useParams();
   const navigate = useNavigate();
 
@@ -64,7 +66,7 @@ function ProjectDetail() {
       const token = localStorage.getItem('access_token');
       
       if (!token) {
-        throw new Error('No access token found. Please login again.');
+        throw new Error(t('errors.noAccessToken'));
       }
 
       const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}`, {
@@ -90,7 +92,7 @@ function ProjectDetail() {
     } catch (err) {
       console.error('Error fetching project:', err);
     }
-  }, [projectId]);
+  }, [projectId, t]);
 
   const fetchTasks = useCallback(async () => {
     try {
@@ -100,7 +102,7 @@ function ProjectDetail() {
       const token = localStorage.getItem('access_token');
       
       if (!token) {
-        throw new Error('No access token found. Please login again.');
+        throw new Error(t('errors.noAccessToken'));
       }
 
       const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/tasks`, {
@@ -136,14 +138,14 @@ function ProjectDetail() {
     } finally {
       setTasksLoading(false);
     }
-  }, [projectId]);
+  }, [projectId, t]);
 
   const fetchDashboard = useCallback(async () => {
     try {
       const token = localStorage.getItem('access_token');
       
       if (!token) {
-        throw new Error('No access token found. Please login again.');
+        throw new Error(t('errors.noAccessToken'));
       }
 
       const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/dashboard`, {
@@ -166,7 +168,7 @@ function ProjectDetail() {
     } catch (err) {
       console.error('Error fetching dashboard:', err);
     }
-  }, [projectId]);
+  }, [projectId, t]);
 
   useEffect(() => {
     fetchProject();
@@ -297,15 +299,15 @@ function ProjectDetail() {
   return (
     <>
       <GenericScreen
-        title={project ? project.name : 'Project Detail'}
+        title={project ? project.name : t('projectDetail.title')}
         backPath={`/projects/${projectId}`}
       >
         <div className="project-summary">
-          <h2>Project Summary</h2>
+          <h2>{t('projectDetail.projectSummary')}</h2>
           
           <div className="summary-cards">
             <div className="summary-card">
-              <div className="summary-card-label">Budget</div>
+              <div className="summary-card-label">{t('projectDetail.budget')}</div>
               <div className="summary-card-value budget-value">{formatCurrency(budget)}</div>
             </div>
             
@@ -314,7 +316,7 @@ function ProjectDetail() {
               onClick={() => navigate(`/projects/${projectId}/expenses`)}
               style={{ cursor: 'pointer' }}
             >
-              <div className="summary-card-label">Planned Cost</div>
+              <div className="summary-card-label">{t('projectDetail.plannedCost')}</div>
               <div className="summary-card-value planned-value">{formatCurrency(plannedCost)}</div>
             </div>
             
@@ -323,7 +325,7 @@ function ProjectDetail() {
               onClick={() => navigate(`/projects/${projectId}/expenses`)}
               style={{ cursor: 'pointer' }}
             >
-              <div className="summary-card-label">Actual Cost</div>
+              <div className="summary-card-label">{t('projectDetail.actualCost')}</div>
               <div className={`summary-card-value actual-value ${isOverBudget ? 'red' : 'green'}`}>
                 {formatCurrency(actualCost)}
               </div>
@@ -332,29 +334,29 @@ function ProjectDetail() {
         </div>
 
         <div className="project-progress">
-          <h2>Project Progress</h2>
+          <h2>{t('projectDetail.projectProgress')}</h2>
           
           <div className="progress-cards"  style={{ cursor: 'pointer' }}>
             <div className={`progress-card tasks-card ${isBehindSchedule ? 'behind-schedule' : 'on-schedule'}`} onClick={() => navigate(`/projects/${projectId}/feed`)}>
               <div className="progress-card-header">
-                <div className="progress-card-label">Tasks Progress</div>
+                <div className="progress-card-label">{t('projectDetail.tasksProgress')}</div>
                 <div className={`progress-status ${isBehindSchedule ? 'red' : 'green'}`}>
-                  {isBehindSchedule ? 'Behind Schedule' : 'On Schedule'}
+                  {isBehindSchedule ? t('projectDetail.behindSchedule') : t('projectDetail.onSchedule')}
                 </div>
               </div>
               <div className="progress-stats">
                 <div className="progress-stat">
-                  <span className="progress-stat-label">Actual Tasks Finished</span>
+                  <span className="progress-stat-label">{t('projectDetail.actualTasksFinished')}</span>
                   <span className={`progress-stat-value ${isBehindSchedule ? 'red' : 'green'}`}>
                     {actualTasksFinished}
                   </span>
                 </div>
                 <div className="progress-stat">
-                  <span className="progress-stat-label">Planned Tasks Finished</span>
+                  <span className="progress-stat-label">{t('projectDetail.plannedTasksFinished')}</span>
                   <span className="progress-stat-value planned">{plannedTasksFinished}</span>
                 </div>
                 <div className="progress-stat">
-                  <span className="progress-stat-label">Not Planned Tasks</span>
+                  <span className="progress-stat-label">{t('projectDetail.notPlannedTasks')}</span>
                   <span className="progress-stat-value planned">{notPlannedTasks}</span>
                 </div>
               </div>
@@ -374,29 +376,29 @@ function ProjectDetail() {
 
             <div className="progress-card dates-card" onClick={() => navigate(`/projects/${projectId}/tasks`)}>
               <div className="progress-card-header">
-                <div className="progress-card-label">Project Timeline</div>
+                <div className="progress-card-label">{t('projectDetail.projectTimeline')}</div>
               </div>
               <div className="date-info">
                 <div className="date-box">
-                  <div className="date-box-title">Planned Dates</div>
+                  <div className="date-box-title">{t('projectDetail.plannedDates')}</div>
                   <div className="date-item">
-                    <span className="date-label">Start Date</span>
-                    <span className="date-value">{plannedStartDate ? formatDate(plannedStartDate) : 'N/A'}</span>
+                    <span className="date-label">{t('projectDetail.startDate')}</span>
+                    <span className="date-value">{plannedStartDate ? formatDate(plannedStartDate) : t('common.noData')}</span>
                   </div>
                   <div className="date-item">
-                    <span className="date-label">End Date</span>
-                    <span className="date-value">{plannedEndDate ? formatDate(plannedEndDate) : 'N/A'}</span>
+                    <span className="date-label">{t('projectDetail.endDate')}</span>
+                    <span className="date-value">{plannedEndDate ? formatDate(plannedEndDate) : t('common.noData')}</span>
                   </div>
                 </div>
                 <div className="date-box">
-                  <div className="date-box-title">Actual Dates</div>
+                  <div className="date-box-title">{t('projectDetail.actualDates')}</div>
                   <div className="date-item">
-                    <span className="date-label">Start Date</span>
-                    <span className="date-value">{actualStartDate ? formatDate(actualStartDate) : 'N/A'}</span>
+                    <span className="date-label">{t('projectDetail.startDate')}</span>
+                    <span className="date-value">{actualStartDate ? formatDate(actualStartDate) : t('common.noData')}</span>
                   </div>
                   <div className="date-item">
-                    <span className="date-label">End Date</span>
-                    <span className="date-value">{actualEndDate ? formatDate(actualEndDate) : 'N/A'}</span>
+                    <span className="date-label">{t('projectDetail.endDate')}</span>
+                    <span className="date-value">{actualEndDate ? formatDate(actualEndDate) : t('common.noData')}</span>
                   </div>
                 </div>
               </div>
@@ -408,7 +410,7 @@ function ProjectDetail() {
               style={{ cursor: 'pointer' }}
             >
               <div className="progress-card-header">
-                <div className="progress-card-label">Tasks by Status</div>
+                <div className="progress-card-label">{t('projectDetail.tasksByStatus')}</div>
               </div>
               <div className="tasks-status-chart-container">
                 <PieChart
@@ -417,7 +419,7 @@ function ProjectDetail() {
                   size={200}
                   radius={80}
                   showLegend={true}
-                  emptyMessage="No task data available"
+                  emptyMessage={t('projectDetail.noTaskData')}
                 />
               </div>
             </div>
@@ -427,15 +429,15 @@ function ProjectDetail() {
               onClick={() => navigate(`/projects/${projectId}/expenses`)}
             >
               <div className="progress-card-header">
-                <div className="progress-card-label">Expenses by Type</div>
+                <div className="progress-card-label">{t('projectDetail.expensesByType')}</div>
                 <select 
                   className="expense-type-selector"
                   value={expenseChartType}
                   onChange={(e) => setExpenseChartType(e.target.value)}
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <option value="planned">Planned</option>
-                  <option value="actual">Actual</option>
+                  <option value="planned">{t('projectDetail.planned')}</option>
+                  <option value="actual">{t('projectDetail.actual')}</option>
                 </select>
               </div>
               <div className="expenses-type-chart-container">
@@ -449,7 +451,7 @@ function ProjectDetail() {
                   size={200}
                   radius={80}
                   showLegend={true}
-                  emptyMessage="No expense data available"
+                  emptyMessage={t('projectDetail.noExpenseData')}
                 />
               </div>
             </div>
@@ -457,13 +459,13 @@ function ProjectDetail() {
         </div>
 
         <div className="tasks-section">
-          <h2>Tasks overview</h2>
+          <h2>{t('projectDetail.tasksOverview')}</h2>
           {tasksLoading ? (
-            <div className="tasks-loading">Loading tasks...</div>
+            <div className="tasks-loading">{t('projectDetail.loadingTasks')}</div>
           ) : tasksError ? (
             <div className="tasks-error">{tasksError}</div>
           ) : tasks.length === 0 ? (
-            <div className="no-tasks">No tasks found.</div>
+            <div className="no-tasks">{t('projectDetail.noTasks')}</div>
           ) : (
             <TasksTable
               entities={tasks}
@@ -481,19 +483,19 @@ function ProjectDetail() {
               className="add-menu-button create-task-button"
               onClick={handleOpenCreateTaskDialog}
             >
-              <span className="add-menu-button-label">Create Task</span>
+              <span className="add-menu-button-label">{t('projectDetail.createTask')}</span>
             </button>
             <button 
               className="add-menu-button create-expense-button"
               onClick={handleOpenCreateExpenseDialog}
             >
-              <span className="add-menu-button-label">Create Expense</span>
+              <span className="add-menu-button-label">{t('projectDetail.createExpense')}</span>
             </button>
             <button 
               className="add-menu-button daily-report-button"
               onClick={handleOpenDailyReportDialog}
             >
-              <span className="add-menu-button-label">Daily Report</span>
+              <span className="add-menu-button-label">{t('projectDetail.dailyReport')}</span>
             </button>
           </div>
         )}
